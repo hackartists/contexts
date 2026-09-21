@@ -25,6 +25,10 @@ Inside one SCS, frontend and backend live side by side:
 - The SCS root holds only build and contract files: `proto/`, `public/`, `Makefile`,
   `Cargo.toml`, `package.json`, `meta.ts`, vite/vitest configs, `README.md`.
 
+Read [`SCS.md`](SCS.md) (next to this file) before adding or moving code in an SCS. It sets the
+layout inside `src/` and `ui/`: `ui/` is split into `pages/`, `components/`, `hooks/`, `utils/`
+and generated `types/`, and every custom React hook lives in `ui/hooks/`, one per file.
+
 ## SCS scope
 
 Implement a feature inside one SCS whenever possible. A PR is scoped to one **primary SCS**,
@@ -71,6 +75,13 @@ No comments or doc comments in `.rs`, `.ts`, `.tsx`, `.css`, `.proto`, Makefile,
 (`docs/architecture.md` "Comments", `docs/conventions/anti-patterns.md`). Names are the
 documentation. When you edit a file that still has comments, delete them too. Generated files
 keep their generator's header.
+
+## Mobile web
+
+Read [`MOBILE.md`](MOBILE.md) (next to this file) before any mobile web work, and apply it when
+reviewing a PR that adds or changes a mobile layout. A mobile change must never alter the desktop
+render: express it only as Tailwind `max-md:` variants, or split mobile and desktop into
+separate components behind one clear branch.
 
 ## Rust
 
@@ -188,3 +199,5 @@ PRs target `dev`. Before opening one, check:
 - [ ] No inline test modules; no inline string errors.
 - [ ] No new BFF feature routes; no generated TypeScript committed.
 - [ ] No spec, plan or code-narrating docs added.
+- [ ] New or moved UI code follows the `SCS.md` layout; custom hooks are in `ui/hooks/`.
+- [ ] Mobile changes follow `MOBILE.md`; desktop render unchanged.
