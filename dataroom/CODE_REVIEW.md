@@ -86,6 +86,28 @@ review and report each one.
 - For a PR that adds or changes a mobile layout, apply the `MOBILE.md` "Code review
   checklist". Any change to the desktop render is a blocking finding.
 
+**UI reuse**
+
+For a PR that adds or changes UI code (`.tsx`, `.ts` and `.css` under an SCS's `ui/` or
+under `packages/`):
+
+- Shared components: list what `packages/components` exports, then check every new or
+  changed component, element and style block in the diff against that list. Flag markup
+  the diff builds by hand where a shared component already does the job (buttons, inputs,
+  selects, modals and dialogs, dropdowns, tabs, tooltips, tables, badges, icons, loaders,
+  empty states and so on). Name the component to use and its import path. Also flag a
+  local component that copies or nearly copies a shared one.
+- Well-known libraries: flag logic the diff writes itself when a well-known, maintained
+  library does the same thing — date and time formatting or arithmetic, debounce and
+  throttle, deep clone or compare, form state and validation, data fetching and caching,
+  virtualised lists, drag and drop, focus trapping, positioning of popovers, file size or
+  number formatting, class name merging, and similar. Check the SCS's and the root
+  `package.json` first: a library the repository already depends on is the strongest
+  suggestion. Name the library and the function or hook to use. Suggest a new dependency
+  only when the hand-written code is non-trivial (more than a few lines, or has edge cases
+  it gets wrong or skips); never for a one-line helper.
+- Collapse repeated occurrences of the same pattern into one comment that lists the sites.
+
 **No comments in source**
 
 - Flag every comment the diff adds to a source file and ask the author to delete it.
