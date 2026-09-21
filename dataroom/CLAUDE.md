@@ -138,6 +138,31 @@ logic.
 - When adding a user-visible capability, add one entry at the existing level of abstraction
   (e.g. a new item in the list of assessment methods), not a walkthrough.
 
+### SCS README
+
+Every `services/<name>/README.md` and `plugins/<name>/README.md` follows the shape of
+`services/dataroom/README.md`. Sections, in this order; drop one only when it would be empty:
+
+| Section | Holds |
+|---|---|
+| `# <Name>` + intro | What the thing is in domain terms, what this SCS owns, and what it ships (plugin id, route) |
+| `## Purpose` | Three or so bullets: why the SCS exists and what it is the single owner of |
+| `## Features` | Table `Feature \| What a user can do`, one row per user-visible capability |
+| `## Where it sits` | Table `Direction \| Peer \| How \| What for` for every gRPC, HTTP and Kafka peer, in and out |
+| `## Plugin methods` / API | Table `Method(s) \| Does \| Who may call`; group related methods in one row |
+| `## Events` | Table `Direction \| Topic \| Payload \| Consumer / producer`, plus delivery guarantees a caller relies on |
+| `## Data it owns` | Table `Table \| Holds`, described in domain terms, then who else reads it and how |
+| `## Not in this service` | Where neighbouring responsibilities live |
+| `## Running it` | Table `Setting \| Meaning` for env vars, operational pitfalls, then the `make` / `pnpm` commands |
+
+- Write for someone using or integrating with the SCS, not for someone reading its code. No
+  function, struct, field, file-by-file or control-flow narration; name a type or path only when
+  it is part of the contract (a proto service, an event payload, a table, a shared UI entry).
+- Describe behaviour a peer depends on (auth per method, one run in flight, idempotent consumers),
+  not how it is implemented.
+- Keep it current: a PR that adds a method, event, table, peer or setting updates the matching row
+  in the same PR.
+
 ## Versions
 
 Only the SCSs that ship a plugin bundle (`meta.ts`) are versioned: `services/dataroom`,
