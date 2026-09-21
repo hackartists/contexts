@@ -2,7 +2,8 @@
 
 Dataroom is a monorepo of self-contained systems (SCS). Each SCS owns its tables, its backend
 and, where it has one, its UI, and talks to the others only over gRPC and typed Kafka events.
-Code review enforces every rule below; write code that already satisfies them.
+Code review enforces every rule below; write code that already satisfies them. How a PR is
+reviewed against these rules is in [CODE_REVIEW.md](CODE_REVIEW.md).
 
 ## Before you start
 
