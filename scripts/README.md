@@ -1,29 +1,7 @@
 # setup (new machine)
 
-Anyone with access to the repo copies one script and runs it. The script:
-
-1. clones the repo (default `~/contexts`, or fast-forwards an existing clone)
-2. installs the repo's `CLAUDE.md` into `~/.claude/CLAUDE.md` as a managed block, replacing `{{CONTEXTS_DIR}}` with the clone path
-   (content outside the block is kept, and the original file is backed up to `CLAUDE.md.bak.<time>`)
-3. sets the git identity for the repo if it's missing, then installs the watchdog service
-
-```bash
-# macOS
-bash bootstrap.sh [clone_dir]
-```
-
-```powershell
-# Windows
-powershell -ExecutionPolicy Bypass -File bootstrap.ps1 [-Dest C:\path\to\contexts]
-```
-
-Scripts: `scripts/macos/bootstrap.sh`, `scripts/windows/bootstrap.ps1`.
-You need permission to push to the repo; with SSH, `ssh -T git@github.com` must succeed.
-
-## Adding a mapping
-
-Edit the repo's `CLAUDE.md`, not `~/.claude/CLAUDE.md`. Write paths with the `{{CONTEXTS_DIR}}` prefix.
-The watchdog pushes the change, and on every machine it pulls the change and re-renders `~/.claude/CLAUDE.md`.
+For the copy-paste install commands and how to add a mapping, see the [root README](../README.md).
+The install commands run `scripts/macos/bootstrap.sh` / `scripts/windows/bootstrap.ps1`.
 
 # watchdog
 
