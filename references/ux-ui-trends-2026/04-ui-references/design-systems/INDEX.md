@@ -189,6 +189,158 @@ Carbon의 disclosure 패턴이 가장 구체적이고, 규칙이 전부 "쓰지 
 
 ---
 
+## 가로 폭 운용
+
+### 요약 비교표
+
+| 시스템 | 페이지 최대 폭 (토큰/값) | 최대 브레이크포인트 | 본문 measure(행 길이) |
+|---|---|---|---|
+| **IBM Carbon** | 브레이크포인트 "Max" = **1584px / 99rem** (16 컬럼, margin 24px, padding 16px). 카본 사이트 자체 그리드 CSS도 `max-width: 99rem` | **1584px** | **문서화 없음** |
+| **GitHub Primer** | `PageLayout containerWidth` — `medium: 768px` / `large: 1012px` / **`xlarge: 1280px`(기본값)** / `full`(무제한) | 1280px (컴포넌트 캡) | **문서화 없음** |
+| **Radix Themes** | `Container size` — `--container-1: 448px` / `--container-2: 688px` / `--container-3: 880px` / `--container-4: 1136px`. 기본값 없음(명시 필요) | 1136px | **문서화 없음** |
+| **Microsoft Fluent 2** | 페이지 최대 폭 **미문서화**. 12컬럼 그리드 원칙만 | **xxx-large = 1920 and up** (유일하게 1920+ 구간을 명명) | **문서화 없음**(manuscript grid가 "optimal line length"를 위한 것이라고만 서술, 수치 없음) |
+| **Atlassian ADS** | 페이지 최대 폭 **미문서화**. PageLayout은 슬롯 기반이고 `isMainExtraWide` 토글만 존재 | 미문서화 | **문서화 없음** |
+| **Adobe Spectrum** | 페이지 최대 폭 **미문서화**. platform scale(desktop/mobile 1:1.25)만 | 웹은 `width > 768px` = desktop scale 단일 분기 | **문서화 없음** |
+| **Shopify Polaris (WC)** | 도달 가능한 공개 문서에서 **미문서화** | 미문서화 | **문서화 없음** |
+
+> **가장 중요한 부재부터**: 조사한 7개 시스템 중 **본문 measure(행 길이, ch 또는 px)를 숫자로 문서화한 곳이 하나도 없었다.** `max-w-prose` 대응 토큰도 없다. Fluent 2만 "manuscript grid… helps to ensure readability by consolidating content to provide the optimal line length"라고 **개념만** 언급하고 수치를 주지 않는다. Primer에 `Blankslate[data-narrow] { max-width: 485px }`가 있으나 이건 빈 상태 카피용이지 본문 measure 토큰이 아니다. → **우리가 쓸 measure 값은 이 소스들에서 인용할 수 없다. 자체 결정해야 한다.**
+
+### 1. 페이지 셸 최대 폭 — 캡을 두는가, 가운데 정렬인가
+
+- **Carbon**: 브레이크포인트 표의 마지막 행이 **Max 1584px / 99rem, 16 컬럼, margin 24px**. 1584px를 넘는 구간에 대한 별도 행이 없다 = **그 이상에서는 컬럼 수가 늘지 않고 컬럼이 넓어지거나 그리드가 캡된다.** 카본 사이트 자체 CSS에도 `max-width: 99rem`이 쓰인다. 가운데/좌측 정렬 여부는 프로즈로 명시되지 않았다.
+- **Primer**: `PageLayout`의 `containerWidth`가 **기본 `xlarge` = 1280px**이고 실제 CSS는 `.PageLayoutWrapper[data-width="xlarge"] { max-width: 1280px }`. `full`을 주면 캡이 사라진다. 즉 **기본이 캡이고, 풀블리드는 옵트인.**
+- **Radix Themes**: `Container`가 명시적 캡 컴포넌트이고 4단계. "Container sizes use the following max-width values, **which may be customized if needed**."
+- **Atlassian / Fluent 2 / Spectrum / Polaris**: 페이지 최대 폭 수치를 문서화하지 않는다. Atlassian은 대신 `isMainExtraWide` 같은 토글을 두어 **캡을 제품이 정하게 한다.**
+
+### 2. Measure (행 길이)
+
+**어느 시스템도 숫자를 주지 않는다.** (위 표 및 주석 참조.) 대신 간접 신호는 있다:
+
+- **Atlassian**: "Body L(16px/24px) is the default size for **long-form content**. Use this size for a comfortable reading experience such as in blogs." → 장문은 폭이 아니라 **폰트 크기로 구분**한다.
+- **Carbon**: expressive 타입셋이 "excellent for **long form reading** and scanning, but **would be distracting if used in product**." → 제품 화면과 읽기 화면의 타이포를 아예 분리.
+- **Fluent 2**: manuscript grid = "single column grids… ensure readability by **consolidating content** to provide the optimal line length."
+- **Primer**: `Blankslate[data-narrow] { max-width: 485px; margin: 0 auto; }` — 문장형 카피는 **485px에 캡하고 가운데 정렬**한다는 실물 값(빈 상태 한정).
+
+### 3. 콘텐츠 타입별 폭 정책 — 다른 규칙을 문서화하는가
+
+**Carbon이 유일하게 표로 명시한다.** "Screen regions" 표의 Width 열:
+
+| 영역 | Width | Height |
+|---|---|---|
+| Header | Fluid (Grid) | Fixed (mini unit) |
+| Toolbar | Fluid (Grid) | Fixed (m.u.) |
+| **Side Panel** | **Fixed** | Fluid (Grid) |
+| Menu | **Fixed** | Fluid (Content) |
+| **Content** | **Fixed** | Fluid (Content) |
+| **Data Table** | **Fluid (Grid)** | Fluid (Content) |
+
+→ **Carbon은 "Content는 고정 폭, Data Table은 그리드 유동"이라고 명시적으로 갈라놓았다.** 프로즈/폼 성격의 Content는 넓히지 않고, 테이블만 폭을 먹게 한다. 이것이 이 질문에 대해 찾은 유일한 1차 근거다.
+
+- **폼/입력 필드 최대 폭**: 조사한 시스템 중 **입력 필드 max-width를 px로 문서화한 곳을 찾지 못했다.** (Carbon의 Content "Fixed"가 가장 근접한 서술.) Primer의 Overlay max-width 램프(`small 256 / medium 320 / large 480 / xlarge 640 / xxlarge 960px`)는 오버레이용이지 폼용이 아니다.
+- **Radix Themes**: `Container size`를 콘텐츠 타입에 매핑하는 가이드는 없고 값만 제공.
+
+### 4. 폭이 남으면 늘리지 말고 페인을 더하라 — 문서화된 근거
+
+**Carbon이 이 질문에 정면으로 답하는 문장을 갖고 있다:**
+> "Carefully consider the user's goal for their screen space, particularly when displaying dynamic content. **If a user's goal is to see more items, scale column count by tiling fixed boxes. If a user wants to see more content within each item, scale boxes and use fixed column counts.**"
+> 그리고 fluid column 설명: "scaling the size of things is more useful to the user than scaling the number of visible things" — 즉 **에디토리얼/대시보드/차트는 크기 스케일, 목록형은 개수 스케일.**
+
+**Fluent 2**는 reflow를 responsive technique으로 명시:
+> "a single column of content in a smaller window can be **reflowed on a larger window to display two columns of text**. This allows more content to be displayed 'above the fold.'"
+> 그리고 "Show or hide page elements" — 큰 화면에서는 각 항목에 메타데이터를 더 붙이고, 작은 화면에서는 줄인다.
+
+**명명된 패턴과 실제 폭 (문서/실 구현값):**
+
+| 패턴 | 시스템 | 문서화된 폭 |
+|---|---|---|
+| **PageLayout.Pane** (콘텐츠 옆 보조 페인) | Primer | `width` = `small` / `medium`(기본) / `large`. **실 CSS 값**: `<768px`에서 전부 `100%`(스택), **≥768px: small 240 / medium 256 / large 256px**, **≥1012px: small 256 / medium 296 / large 320px**. `minWidth` **기본 256**. 페인 최대 폭은 `--pane-max-width-diff: 511px`(= 컨테이너 폭 − 511px)로 제한 |
+| **PageLayout.Sidebar** (헤더·푸터까지 걸치는 풀하이트) | Primer | Pane과 같은 키, 최소 256, `--sidebar-max-width-diff: 256px` |
+| **LeftSidebar / RightSidebar / RightPanel** 슬롯 | Atlassian | 슬롯 기반. 기본 폭 px는 **문서화되지 않음**(예제에서 125/200/250을 쓰지만 이는 예시값). `isMainExtraWide` 토글 존재 |
+| **SideNavigation** | Atlassian | **"The minimum width of the container is 240px."** (명시) |
+| **Flexible / Fixed / Floating panel** | Carbon | 폭 px 미문서화. 동작만 규정 — flexible은 접힘/펼침 가능하되 **"The expanded state of a flexible Panel is a fixed width that cannot be adjusted by the user"**, 펼칠 때 "either **condense both the content and the grid** or they **push content beyond the edge of the browser**". fixed panel은 **"exist outside of the responsive grid"**. floating panel은 그리드에 영향 없음 + 반드시 dismissible |
+
+**Primer가 Pane과 Sidebar를 구분한 것이 중요하다**: "PageLayout.Pane sits only beside the content area — unlike PageLayout.Sidebar, which is a **full-height sidebar that spans adjacent to the header, content, and footer areas**." → 보조 컨텍스트는 Pane(콘텐츠 옆), 앱 내비는 Sidebar(풀하이트)로 계층이 갈린다.
+
+### 5. 리사이즈 가능한 페인 — min/max와 영속성
+
+- **Primer `PageLayout.Pane`**:
+  - `resizable` (기본 false). **"Uses localStorage persistence by default."** 키는 `widthStorageKey`, **기본값 `'paneWidth'`**.
+  - `minWidth` 기본 **256**. 실제 폭은 CSS `width: clamp(var(--pane-min-width), var(--pane-width), var(--pane-max-width))` — **768px 미만에서는 clamp 자체가 적용되지 않고 100% 스택**.
+  - 커스텀 폭은 `width={{min, default, max}}` 객체. **더블클릭하면 `width`의 default로 리셋**("The width prop still defines the default used when resetting (e.g., double-click)").
+  - 제어형은 `currentWidth` + `onResizeEnd(width)` — onResizeEnd를 주면 localStorage 영속성을 대체한다.
+  - **SSR 경고를 문서에 박아뒀다**: "with default persistence in SSR, the server-rendered width may differ from the stored client width, **causing a brief layout shift on hydration**. Use `onResizeEnd` with server-aware storage to avoid this."
+  - `sticky` + `offsetHeader`(px 또는 `5rem` 같은 문자열)로 sticky 헤더 아래에 고정 가능.
+- **Atlassian `LeftSidebar`**:
+  - `shouldPersistWidth` — **"It saves the width in local storage."**
+  - `collapsedState: "collapsed" | "expanded"` 및 `width` prop이 **localStorage 값을 override**한다("this will override the setting in localStorage").
+  - 접힌 상태에서 hover하면 **flyout**으로 펼쳐짐(`onFlyoutExpand` / `onFlyoutCollapse`, "Called after flyout delay").
+  - 접근성까지 계약: `resizeGrabAreaLabel`(슬라이더 grab area의 AT 라벨), `resizeButtonLabel`, `valueTextLabel` → **`aria-valuetext="Width 62%"`** 형태로 렌더. 즉 **리사이즈 핸들은 `role="slider"` 상당으로 키보드/스크린리더에서 조작 가능해야 한다.**
+  - 사용 가이드: **"People can personalise their working area or get more space to work by resizing, expanding, or collapsing the sidebar."**
+- **Carbon**: flexible panel은 **"fixed width that cannot be adjusted by the user"** — 사용자 리사이즈를 명시적으로 **제공하지 않는다**.
+
+### 6. 울트라와이드 (≥1920 / ≥2560)
+
+- **Microsoft Fluent 2가 유일하게 1920+ 구간을 명명한다**: size class 표 — small 320–479 / medium 480–639 / large 640–1023 / x-large 1024–1365 / xx-large 1366–1919 / **xxx-large 1920 and up**. 그 구간에서 무엇을 하라는 지시는 없고, 일반 기법(scale / reflow / show-hide)만 제시.
+- **Carbon**: 최대 브레이크포인트가 **1584px**이고 그 위 구간이 없다. 즉 **1584 초과는 명시적으로 다루지 않는다.**
+- **Primer**: 컴포넌트 캡 최대가 **1280px**(`xlarge`), 내부 미디어쿼리 브레이크는 768 / 1012px. **1440px 이상 전용 분기가 없다.**
+- **Radix Themes**: 최대 컨테이너가 **1136px**.
+- **Atlassian / Spectrum / Polaris**: 울트라와이드 지침 없음. Spectrum의 웹 분기는 `width > 768px` 단 하나(desktop scale).
+
+> **정리: 2560px 모니터를 위한 지침을 가진 디자인 시스템은 사실상 없다.** 이들의 공통 전략은 "컨테이너를 1136–1584px에 캡하고 나머지는 여백"이거나(Primer·Radix·Carbon), "제품이 알아서 하라"(Atlassian·Fluent)다. **남는 폭을 쓰는 유일하게 문서화된 방법이 Carbon의 "목표가 more items면 컬럼 수를 늘려라"와 Fluent의 reflow(1단 → 2단)뿐이다.**
+
+### 7. 테이블과 폭
+
+- **Carbon**: screen regions 표에서 **Data Table = Fluid (Grid)** — 즉 그리드 폭을 그대로 먹는다. 동시에 강한 금지 규칙이 있다: **"Data tables should be placed in a page's main content area and given plenty of space to display data without truncation. Avoid placing data tables inside data tables or smaller containers where the information can feel cramped or needs truncation."** → **테이블은 캡된 프로즈 컨테이너 안에 넣지 말라는 뜻.**
+- **컬럼 개수**: Carbon은 최소만 규정 — **"Tables require three or more columns."** 상한을 문서화한 시스템은 없었다.
+- **sticky 첫 컬럼 / 가로 스크롤**: Polaris `s-table`에 "with **fixed first columns**" 예제와 "with **sticky header** enabled" 예제가 존재한다. 디자인 가이드라인 프로즈로 "가로 스크롤 vs 컬럼 토글" 중 무엇을 택하라고 규정한 시스템은 **없었다.**
+- **컬럼 폭 제어**: Primer가 가장 구체적 — 컬럼별 `width` / `minWidth` / `maxWidth` 및 `grow`, `growCollapse` (예: `grow w/ 200px max`, `growCollapse w/ 100px min`). **즉 "테이블 전체를 늘린다"가 아니라 "어느 컬럼이 남는 폭을 먹을지 컬럼 단위로 선언"하는 방식.**
+- **오버플로 신호**: Atlassian `elevation.shadow.overflow`가 **"the horizontal scroll in tables on a Confluence page"**를 예로 든다 — 가로로 잘린 테이블에는 그림자로 표시.
+- **풀블리드 허용 여부**: Primer의 `containerWidth='full'`이 페이지 단위 옵트아웃이지, "페이지는 캡하되 테이블만 풀블리드"를 문서화한 시스템은 **없었다.** Carbon의 Content=Fixed / Data Table=Fluid 구분이 가장 근접한 근거다.
+
+---
+
+## 우리 화면에 적용할 폭 규칙
+
+전제: 분석가가 1440–2560px 모니터에서 본다. 근거 있는 값은 출처를 붙였고, 출처가 없는 값(특히 measure)은 **자체 결정**이라고 명시했다.
+
+**0. 셸 레벨 — 페이지는 캡하지 않고, 캡은 콘텐츠 타입이 건다.**
+`workspace-content`에 전역 `max-w-*`를 걸지 않는다. Carbon의 Content=Fixed / Data Table=Fluid 구분을 그대로 가져와, **캡은 프로즈·폼 영역에만 건다.** 대신 셸 좌우 패딩은 브레이크포인트별로 Carbon 마진 램프를 따른다 — `px-4`(16px, <1056px) → `px-4`(16px, ≥1056) → `px-6`(24px, ≥1584). 이걸 `theme.css`가 아니라 `workspace-content`가 소유한다.
+
+**1. 문서 목록 테이블 — 캡 없음, 풀 폭.**
+`w-full`, `max-w-none`. Carbon: "given plenty of space to display data without truncation… avoid placing data tables inside smaller containers." 남는 폭은 테이블 전체를 균등하게 늘리지 말고 **Primer 방식으로 컬럼 단위 분배**: 문서명 컬럼만 `w-full`(grow) + `min-w-[240px]`, 나머지(상태·담당·수정일·크기)는 `w-[112px]` 류 고정. 2560px에서 날짜 컬럼이 400px가 되는 걸 막는 유일한 방법이다. 가로 스크롤이 생기면 좌측 문서명 컬럼을 `sticky left-0` + `--shadow-overflow`(위 depth 규칙 5번)로 처리.
+
+**2. 문서 뷰어 — 뷰어 자신의 자연 폭을 존중하고, 남는 폭은 페인에 준다.**
+PDF/문서 페인은 `flex-1` + `min-w-[560px]`(자체 결정: A4 가로 595pt를 넘지 않는 선에서 축소 없이 보이는 최소치). 뷰어를 무한히 늘리지 않고, 1440px를 넘어가면 **폭을 우측 컨텍스트 페인(근거·코멘트·AI findings)에 배분**한다 — Carbon "목표가 more items면 개수를 늘려라", Fluent "1단 → 2단 reflow"가 문서화된 근거다.
+
+**3. 평가 기준 + 근거(criteria ladder) — 2-pane 고정.**
+래더(목록)는 좌측 고정 폭, 근거/설명은 우측. 래더 자체는 `text-sm`(14px) 계층형 목록이므로 넓힐 이유가 없다.
+
+**4. 폼 · 설정 — 개별 필드에 캡을 건다. 컨테이너를 넓히지 않는다.**
+필드 max-width를 px로 문서화한 시스템이 없으므로 **자체 결정**한다: 단일 행 입력(이름·이메일·숫자)은 `max-w-sm`(384px), 셀렉트·날짜는 `max-w-xs`(320px), 텍스트에어리어·URL은 `max-w-2xl`(672px). 설정 페이지 전체 컨테이너는 `max-w-[880px]`(Radix `--container-3` 값 채택). 2560px에서 입력창이 2000px가 되는 것은 어떤 시스템도 허용하지 않는다.
+
+**5. 프로즈(문서 추출 텍스트 · AI 요약 · 긴 설명) — measure를 우리가 정한다.**
+**어떤 디자인 시스템도 measure 수치를 문서화하지 않았으므로 인용할 근거가 없다.** 자체 결정: `text-base`(16px/24px) 기준 **`max-w-[68ch]`** 를 프로즈 전용 유틸(`--prose-measure`)로 `theme.css`에 넣는다. 좌측 정렬(가운데 정렬 금지 — 옆 페인과 시선 기준선이 어긋난다). 유일한 예외로 Primer의 `Blankslate[data-narrow] { max-width: 485px; margin: 0 auto }`를 따라 **빈 상태 카피만 485px 가운데 정렬**.
+
+**6. 리뷰어 스코어링 패널 — 페인 고정 폭, 늘리지 않음.**
+스코어 입력은 컨트롤 묶음이지 읽기 영역이 아니다. Primer의 ≥1012px pane 램프를 그대로 채택: **small 256 / medium 296 / large 320px**. 스코어링 패널 = `large`(320px), 메타데이터 패널 = `medium`(296px).
+
+**7. `two-depth-pane`의 기본값 — Primer 램프 + Atlassian 최소값.**
+- `defaultWidth`: **296px** (Primer `medium` @≥1012px)
+- `minWidth`: **256px** (Primer `PageLayout.Pane` `minWidth` 기본값)
+- 내비 성격의 pane이면 최소 **240px** (Atlassian SideNavigation "minimum width of the container is 240px")
+- `maxWidth`: **컨테이너 폭 − 511px** (Primer `--pane-max-width-diff: 511px`) → detail 페인이 511px 아래로 눌리지 않는다
+- **1012px 미만**: 리사이즈를 끄고 pane을 100%로 스택 (Primer가 768px 미만에서 clamp를 아예 해제하는 것과 같은 전략, 우리는 데스크톱 앱이므로 1012px 기준으로 올림 — 자체 결정)
+- 폭은 **`localStorage`에 영속**하되, 키를 **플러그인 id로 네임스페이스**(`paneWidth:<pluginId>`)한다. Primer는 단일 `'paneWidth'` 키를 쓰지만 우리는 번들이 여러 개라 반드시 분리해야 한다.
+- **더블클릭 = 기본값 리셋** (Primer 동작 채택)
+- SSR/하이드레이션 레이아웃 시프트 경고를 Primer가 명시했으므로, 초기 렌더는 `defaultWidth`로 그리고 저장값은 마운트 후 적용하되 **transition을 끈 상태로 1프레임 안에** 적용한다.
+- 리사이즈 핸들은 Atlassian 계약을 따른다: 키보드 조작 가능 + `aria-valuetext="Width <n>%"` + grab area에 AT 라벨.
+- **접기(collapse)는 지원하되 hover flyout은 넣지 않는다** — Atlassian의 flyout은 내비용이고, 우리 detail 페인은 읽기 대상이라 hover로 열리면 안 된다(Carbon disclosure "never open automatically"와 같은 이유).
+
+**8. 울트라와이드(≥1920) — 3번째 페인을 열되, 세 번째까지만.**
+어떤 시스템도 1920+ 지침을 주지 않으므로 **자체 결정**한다: ≥1920px에서만 우측 컨텍스트 페인(AI findings / 코멘트)을 기본 노출하고, 그 아래에서는 토글로 둔다. 페인 3개(내비 + 리스트/뷰어 + 컨텍스트)를 상한으로 하고, 그 이상 남는 폭은 **테이블 컬럼과 뷰어에만** 배분한다. VS Code가 Primary/Secondary Sidebar 2개로 끝내고 더 늘리지 않는 것과 같은 이유 — 고정된 영역 개수가 공간 기억의 전제다.
+
+---
+
 ## 플러그인 셸 패턴
 
 ### 1. 호스트는 어떻게 플러그인이 "남의 것처럼" 보이는 걸 막는가 — 실제 메커니즘
@@ -341,3 +493,18 @@ Carbon의 disclosure 패턴이 가장 구체적이고, 규칙이 전부 "쓰지 
 - **어떤 시스템도 "reading pane + context pane" split view를 정식 패턴으로 문서화하지 않았다.** VS Code의 Primary/Secondary Sidebar 구조가 가장 근접한 공개 문서다.
 - **WCAG 2.2의 2.5.8 Target Size(24×24 CSS px)를 명시적으로 인용한 디자인 시스템 페이지를 찾지 못했다.** WCAG 2.2 AA 준수를 선언한 곳은 Primer뿐이고, Carbon은 2.1 AA로 표기한다.
 - **glass / translucency / backdrop-blur를 토큰이나 가이드라인으로 문서화한 시스템은 없었다.**
+- **본문 measure(행 길이)를 `ch`나 px로 문서화한 시스템이 하나도 없었다.** Carbon, Atlassian, Spectrum, Fluent 2, Primer, Radix Themes의 타이포그래피 페이지 전부 확인. `max-w-prose` 대응 토큰도 없다. Fluent 2만 manuscript grid 설명에서 "optimal line length"를 개념으로 언급하고 수치를 주지 않는다.
+- **입력 필드 / 폼의 max-width를 px로 문서화한 시스템을 찾지 못했다.** Carbon의 screen regions 표에서 Content 영역이 "Fixed" width라고 표기된 것이 가장 근접한 서술이다.
+- **≥1920px(울트라와이드) 전용 레이아웃 지침을 준 시스템이 없다.** Fluent 2만 `xxx-large = 1920 and up` size class를 **이름만** 정의하고, 그 구간에서 무엇을 하라는 지시는 없다. Carbon의 최대 브레이크포인트는 1584px, Primer의 최대 컨테이너 캡은 1280px, Radix의 최대 컨테이너는 1136px에서 끝난다.
+- **"가로 스크롤 vs 컬럼 토글" 중 무엇을 택하라고 규정한 테이블 가이드라인이 없다.** Polaris `s-table`에 fixed first column / sticky header 예제가 있을 뿐 선택 기준은 프로즈로 제시되지 않는다. 테이블 **컬럼 개수 상한**을 문서화한 시스템도 없다(Carbon이 하한 "three or more columns"만 규정).
+- **"페이지는 캡하되 테이블만 풀블리드"를 명시적으로 허용/금지한 시스템이 없다.** Primer의 `containerWidth='full'`은 페이지 전체 단위 옵트아웃이다.
+- **Atlassian PageLayout의 사이드바 기본/최소/최대 폭 px가 문서화돼 있지 않다.** 예제 코드의 `width={125}`, `width={200}`, `width={250}`은 예시값이지 기본값이 아니므로 근거로 쓰지 않았다. Atlassian이 px로 명시한 유일한 값은 SideNavigation의 "minimum width of the container is 240px"다.
+- **Adobe Spectrum에는 페이지 최대 폭·그리드 브레이크포인트 문서가 없다.** `spectrum.adobe.com/page/responsive-design/`은 404였고(캡처 삭제), 폭 관련 공개 문서는 platform scale(desktop/mobile 1:1.25, 웹은 `width > 768px` 단일 분기)뿐이다.
+
+## 수치의 출처 구분
+
+INDEX 안의 px 값은 세 종류이고, 본문에서 구분해 표기했다.
+
+1. **문서 프로즈/표에 적힌 값** — Carbon row height·브레이크포인트, Atlassian·Fluent·Primer·Radix 타입 스케일, Radix `--container-1…4`, Primer `minWidth: 256` / `widthStorageKey: 'paneWidth'` / `containerWidth` 키, Atlassian SideNavigation 240px, Fluent `$shadow2…64` 및 휘도식.
+2. **배포된 CSS에서 직접 읽은 값**(프로즈에는 없음, 라이브 문서 사이트의 스타일시트에서 측정) — Primer `containerWidth`의 실제 px(medium 768 / large 1012 / xlarge 1280), `--pane-width-small/medium/large`의 브레이크포인트별 값(240·256·256 @≥768px, 256·296·320 @≥1012px), `--pane-max-width-diff: 511px`, `--sidebar-max-width-diff: 256px`, Primer Overlay max-width 램프, `Blankslate[data-narrow] max-width: 485px`.
+3. **자체 결정(출처 없음)** — 본문에 "자체 결정"이라고 명시한 것들: 프로즈 measure `68ch`, 폼 필드 캡(384/320/672px), 뷰어 `min-w-[560px]`, `two-depth-pane`의 1012px 스택 임계값, ≥1920px 3번째 페인 노출.
