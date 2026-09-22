@@ -95,4 +95,4 @@ Anticipatory 가 신뢰를 못 얻은 상태에서 Delegation 을 열면 아무�
 
 ---
 
-*근거: [`README.md`](README.md) 의 2026년 수집 자료 및 NN/g Information Foraging 문헌.*
+*근거: [`references/ux-ui-trends-2026/`](../references/ux-ui-trends-2026/README.md) 의 2026년 수집 자료 및 NN/g Information Foraging 문헌.*
