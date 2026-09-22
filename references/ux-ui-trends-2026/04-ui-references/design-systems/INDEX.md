@@ -34,7 +34,20 @@
 | `primer_size-primitives.png` | GitHub Primer | https://primer.style/foundations/primitives/size | `--base-size-*` 4px 기반 사이즈 프리미티브 |
 | `shadcn_data-table.png` | shadcn/ui | https://ui.shadcn.com/docs/components/data-table | TanStack Table 레시피 — 정렬/필터/컬럼 visibility/행 선택 전체 코드 |
 | `radix-themes_table.png` | Radix Themes | https://www.radix-ui.com/themes/docs/components/table | `size` 1/2/3, `variant` surface/ghost |
+| `radix_text.png` | Radix Themes | https://www.radix-ui.com/themes/docs/components/text | 9단계 타입 스케일 실물 |
 | `tailwindcss-v4_font-size.png` | Tailwind CSS v4 | https://tailwindcss.com/docs/font-size | `--text-*` + `--text-*--line-height` 페어링 토큰 구조 |
+
+## 1-b. Screenshots — 레이아웃 / 가로 폭
+
+| Screenshot | System | URL | What it shows |
+|---|---|---|---|
+| `carbon_2x-grid.png` | IBM Carbon | https://carbondesignsystem.com/elements/2x-grid/overview/ | 브레이크포인트 표(320/672/1056/1312/1584), 마진·거터, screen region별 width 정책, 패널 3종 동작 |
+| `primer_page-layout.png` | GitHub Primer | https://primer.style/product/components/page-layout/ | `containerWidth`, `PageLayout.Pane` width/minWidth/resizable/sticky props 전체 |
+| `atlassian_page-layout.png` | Atlassian ADS | https://atlassian.design/components/page-layout/examples | TopNavigation/LeftSidebar/Main/RightSidebar/RightPanel 슬롯 구조, `isMainExtraWide` 토글 |
+| `atlassian_page-layout-usage.png` | Atlassian ADS | https://atlassian.design/components/page-layout/usage | 사이드바 리사이즈/접기로 작업 공간을 넓히라는 가이드 |
+| `atlassian_side-navigation.png` | Atlassian ADS | https://atlassian.design/components/side-navigation/examples | 사이드 내비 최소 폭 240px, 중첩 내비 |
+| `fluent2_layout.png` | Microsoft Fluent 2 | https://fluent2.microsoft.design/layout | 12컬럼 그리드, manuscript/column/modular 그리드, size class 표(xxx-large 1920+), reflow 기법 |
+| `radix-themes_container.png` | Radix Themes | https://www.radix-ui.com/themes/docs/components/container | `--container-1…4` = 448 / 688 / 880 / 1136px |
 
 ## 2. Screenshots — 플러그인 셸 (추가 스코프)
 
