@@ -23,6 +23,10 @@ for (let y = 0; y < h; y += 700) { await p.evaluate(y => window.scrollTo(0,y), y
 let offset = 0;
 if (mode.startsWith('scroll:')) offset = parseInt(mode.split(':')[1],10);
 await p.evaluate(y => window.scrollTo(0,y), offset);
+for (const l of labels) {
+  try { const btn = p.getByRole('button', { name: l, exact: false }).first();
+    if (await btn.isVisible({timeout:600})) { await btn.click({timeout:2000}); await p.waitForTimeout(800); break; } } catch(e){}
+}
 await p.waitForTimeout(3000 + parseInt(extra,10));
 try {
   if (sel) { await p.locator(sel).first().screenshot({ path: out }); }
