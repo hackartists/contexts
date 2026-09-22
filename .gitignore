@@ -1,0 +1,13 @@
+# references/ 로 수집한 원문 자료는 로컬 보관.
+# 목록·요약(INDEX.md, README.md)만 버전 관리해서 repo 를 가볍게 유지한다.
+# 원문이 필요하면 INDEX.md 의 소스 URL 로 다시 내려받을 것.
+references/**/*.pdf
+references/**/*.ppt
+references/**/*.pptx
+references/**/*.key
+references/**/*.doc
+references/**/*.docx
+references/**/*.xls
+references/**/*.xlsx
+references/**/*.epub
+references/**/*.zip
