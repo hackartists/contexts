@@ -77,6 +77,15 @@ No comments or doc comments in `.rs`, `.ts`, `.tsx`, `.css`, `.proto`, Makefile,
 documentation. When you edit a file that still has comments, delete them too. Generated files
 keep their generator's header.
 
+## UI
+
+Read [`UI.md`](UI.md) (next to this file) before building or restyling a screen. It sets the
+**design type** (Flat Design 2.0 plus Minimalism — flat surfaces, 1px borders, shadows only on
+floating layers; no glassmorphism, no gradients in product UI), the **design principles** a
+screen is checked against (**Information Density**, **Grounding**, **Progressive Disclosure**),
+and the **colour and width rules** (colour carries state only, sequential scales for grades,
+container queries inside panes). Apply it when reviewing a PR that adds or changes a screen.
+
 ## UX
 
 Read [`UX.md`](UX.md) (next to this file) before designing a user-facing flow. It defines the
@@ -210,5 +219,6 @@ PRs target `dev`. Before opening one, check:
 - [ ] No new BFF feature routes; no generated TypeScript committed.
 - [ ] No spec, plan or code-narrating docs added.
 - [ ] New or moved UI code follows the `SCS.md` layout; custom hooks are in `ui/hooks/`.
+- [ ] Screens follow `UI.md`: flat surfaces, shadows only on floating layers, colour for state only, no product-UI gradients.
 - [ ] User-facing flows follow `UX.md`: next step legible; unasked-for actions ignorable and reversible; delegated actions have range, review and undo.
 - [ ] Mobile changes follow `MOBILE.md`; desktop render unchanged.
