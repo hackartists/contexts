@@ -11,3 +11,8 @@ references/**/*.xls
 references/**/*.xlsx
 references/**/*.epub
 references/**/*.zip
+references/**/*.png
+references/**/*.jpg
+references/**/*.jpeg
+references/**/*.webp
+references/**/*.gif
