@@ -20,8 +20,10 @@ for (const l of labels) {
 // scroll to trigger lazy content
 const h = await p.evaluate(() => document.body.scrollHeight);
 for (let y = 0; y < h; y += 700) { await p.evaluate(y => window.scrollTo(0,y), y); await p.waitForTimeout(220); }
-await p.evaluate(() => window.scrollTo(0,0));
-await p.waitForTimeout(2500);
+let offset = 0;
+if (mode.startsWith('scroll:')) offset = parseInt(mode.split(':')[1],10);
+await p.evaluate(y => window.scrollTo(0,y), offset);
+await p.waitForTimeout(3000);
 try {
   if (sel) { await p.locator(sel).first().screenshot({ path: out }); }
   else await p.screenshot({ path: out, fullPage: mode === 'full' });
