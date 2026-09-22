@@ -83,7 +83,8 @@ Read [`UX.md`](UX.md) (next to this file) before designing a user-facing flow. I
 three perspectives a flow is checked against, and the order they apply in: **Information Scent**
 (the user is already acting — make the next step legible), **Anticipatory Design** (the system
 acts unasked — keep it ignorable and reversible) and **Delegation** (the user hands over a
-bounded scope — give it range, review and undo). Design guidance, not a review rule.
+bounded scope — give it range, review and undo). Apply it when reviewing a PR that adds
+or changes a user-facing flow.
 
 ## Mobile web
 
@@ -209,4 +210,5 @@ PRs target `dev`. Before opening one, check:
 - [ ] No new BFF feature routes; no generated TypeScript committed.
 - [ ] No spec, plan or code-narrating docs added.
 - [ ] New or moved UI code follows the `SCS.md` layout; custom hooks are in `ui/hooks/`.
+- [ ] User-facing flows follow `UX.md`: next step legible; unasked-for actions ignorable and reversible; delegated actions have range, review and undo.
 - [ ] Mobile changes follow `MOBILE.md`; desktop render unchanged.

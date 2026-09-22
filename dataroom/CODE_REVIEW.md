@@ -33,7 +33,7 @@ inline comments, no mention in the summary.
 Before reviewing anything:
 
 - Read the project rules injected with this guide, including the context files they refer to
-  (`SCS.md`, `MOBILE.md`), which are injected alongside them.
+  (`SCS.md`, `MOBILE.md`, `UX.md`), which are injected alongside them.
 - Read `docs/architecture.md` and every file under `docs/conventions/`.
 - Read the `README.md` of every `services/<name>` or `plugins/<name>` directory the diff
   touches, for the abstracted picture of what that service offers.
@@ -80,6 +80,14 @@ review and report each one.
 - Check what a change carries: README rows for a new method, event, table, peer or setting,
   and a Playwright step in the persona journey (`playwright/tests/scenarios/*.spec.ts`)
   rather than a new per-feature spec.
+
+**UX flow** (`UX.md`)
+
+- For a PR that adds or changes a user-facing flow, check it against the three perspectives in
+  `UX.md`. Flag a next step with no legible cue, an unasked-for action the user cannot ignore,
+  and a delegated action without range, review or undo.
+- These are design findings, not blocking ones — except an unasked-for action the user cannot
+  undo, which blocks.
 
 **Mobile web** (`MOBILE.md`)
 
