@@ -1,5 +1,5 @@
 import { chromium } from '/Users/hackartist/data/devel/github.com/biyard/dataroom/playwright/node_modules/playwright/index.mjs';
-const [,, url, out, mode='full', sel=''] = process.argv;
+const [,, url, out, mode='full', sel='', extra='0'] = process.argv;
 const b = await chromium.launch();
 const ctx = await b.newContext({
   viewport: { width: 1440, height: 900 },
@@ -23,7 +23,7 @@ for (let y = 0; y < h; y += 700) { await p.evaluate(y => window.scrollTo(0,y), y
 let offset = 0;
 if (mode.startsWith('scroll:')) offset = parseInt(mode.split(':')[1],10);
 await p.evaluate(y => window.scrollTo(0,y), offset);
-await p.waitForTimeout(3000);
+await p.waitForTimeout(3000 + parseInt(extra,10));
 try {
   if (sel) { await p.locator(sel).first().screenshot({ path: out }); }
   else await p.screenshot({ path: out, fullPage: mode === 'full' });
