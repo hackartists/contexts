@@ -77,6 +77,14 @@ No comments or doc comments in `.rs`, `.ts`, `.tsx`, `.css`, `.proto`, Makefile,
 documentation. When you edit a file that still has comments, delete them too. Generated files
 keep their generator's header.
 
+## UX
+
+Read [`UX.md`](UX.md) (next to this file) before designing a user-facing flow. It defines the
+three perspectives a flow is checked against, and the order they apply in: **Information Scent**
+(the user is already acting — make the next step legible), **Anticipatory Design** (the system
+acts unasked — keep it ignorable and reversible) and **Delegation** (the user hands over a
+bounded scope — give it range, review and undo). Design guidance, not a review rule.
+
 ## Mobile web
 
 Read [`MOBILE.md`](MOBILE.md) (next to this file) before any mobile web work, and apply it when
