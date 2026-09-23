@@ -13,3 +13,4 @@ Also you need to change or write memos, utilize mapped CLAUDE.md for each reposi
 
 | repository                 | mapped CLAUDE.md                                                |
 | github.com/biyard/dataroom | {{CONTEXTS_DIR}}/dataroom/CLAUDE.md |
+| github.com/biyard/3rd-wed | {{CONTEXTS_DIR}}/3rd-wed/CLAUDE.md |
