@@ -25,7 +25,7 @@ Inside one SCS, frontend and backend live side by side:
 - `<name>/ui`: frontend (React + Vite). UI code goes nowhere else.
 - `<name>/src`: backend (Rust). Backend code goes nowhere else.
 - The SCS root holds only build and contract files: `proto/`, `public/`, `Makefile`,
-  `Cargo.toml`, `package.json`, `meta.ts`, vite/vitest configs, `README.md`.
+  `Cargo.toml`, `package.json`, `meta.ts` or `manifest.json`, vite/vitest configs, `README.md`.
 
 Read [`SCS.md`](SCS.md) (next to this file) before adding or moving code in an SCS. It sets the
 layout inside `src/` and `ui/`: `ui/` is split into `pages/`, `components/`, `hooks/`, `utils/`
@@ -145,7 +145,7 @@ logic.
   `search.rs` and `storages.rs` are legacy; do not add siblings next to them.
 - New BFF code is justified only when the browser needs a REST shape the dispatchers cannot
   give it, and the PR description must say why.
-- Frontend: host pages use hooks from `@biyard/bff-client`. Plugin bundles call through
+- Frontend: host pages use hooks from `@biyard/bff-client`. Plugin UIs call through
   `host.call` from `@biyard/plugin-host` and never import react-query hooks. No hand-written
   `fetch` or direct handler calls.
 
@@ -196,16 +196,20 @@ Every `services/<name>/README.md` and `plugins/<name>/README.md` follows the sha
 
 ## Versions
 
-Only the SCSs that ship a plugin bundle (`meta.ts`) are versioned: `services/dataroom`,
-`services/assessment`, `plugins/review`. A PR that changes what goes into one of those bundles
-(its `ui/`, `meta.ts`, `public/`) bumps that SCS's `version` in its `package.json` (patch for
-fixes, minor for features). Backend-only changes and changes to other SCSs do not bump.
+Only the SCSs that ship a plugin bundle (`meta.ts`) are versioned: `plugins/review` and
+`plugins/vc`. A PR that changes what goes into one of those bundles (its `ui/`, `meta.ts`,
+`public/`) bumps that SCS's `version` in its `package.json` (patch for fixes, minor for
+features). Backend-only changes and changes to other SCSs do not bump. `services/dataroom` and
+`services/assessment` are built-in plugins (`manifest.json`, version `"builtin"`): they ship with
+the console build and are never bumped.
 
 - The bundle is published to `{id}/{version}/`, and `scripts/publish-plugin-bundle.sh` refuses
   to overwrite a published version with a different bundle, so a missed bump fails the
   `plugin-bundle` CI job on `dev`.
 - A change to shared UI code a bundle includes (`packages/components`, `packages/plugin-host`)
-  also changes those bundles: bump every plugin that uses it.
+  also changes those bundles: bump every plugin that uses it. The same holds for
+  `services/dataroom/ui` and `services/assessment/ui`: `plugins/review` (and `plugins/vc` when it
+  imports them) compiles that code in, so a change there bumps them.
 - Bump against the version on `dev` at merge time; if `dev` moved past your bump, bump again
   after merging it in.
 
@@ -219,7 +223,8 @@ stays open; only fixed comments get resolved), and watching CI until every check
 Before opening one, check:
 
 - [ ] Scope: one primary SCS; each secondary SCS ≤ 20 lines, or split / justified as above.
-- [ ] Version bumped for every plugin bundle whose contents changed.
+- [ ] Version bumped for every versioned plugin bundle (`plugins/review`, `plugins/vc`) whose
+      contents changed.
 - [ ] No comments in touched source files.
 - [ ] No inline test modules; no inline string errors.
 - [ ] No new BFF feature routes; no generated TypeScript committed.

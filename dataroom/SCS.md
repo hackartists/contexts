@@ -9,7 +9,8 @@ in any `services/<name>` or `plugins/<name>`. It adds to `CLAUDE.md`, `docs/arch
 
 - One directory that owns its tables, its backend and, when it has one, its UI.
 - `services/<name>` are core systems every workspace gets; `plugins/<name>` are features a space
-  opts into. `services/dataroom` and `services/assessment` also ship plugin bundles.
+  opts into. `services/dataroom` and `services/assessment` are also built-in plugins
+  (`manifest.json`), compiled into the console instead of shipping a bundle.
 - Its backend talks to other systems only over gRPC and typed Kafka events. It never links
   another system's crate, and reads another system's table only through a
   `#[postgres(skip_schema)]` mirror.
@@ -22,6 +23,7 @@ in any `services/<name>` or `plugins/<name>`. It adds to `CLAUDE.md`, `docs/arch
 <name>/
 ├── Cargo.toml · build.rs · proto/          backend crate and its gRPC contract
 ├── package.json · meta.ts · vite.config.ts UI package and bundle meta (bundle SCSs)
+├── manifest.json                           plugin manifest (built-in SCSs, no bundle)
 ├── public/                                 static assets copied into the bundle
 ├── Makefile · Dockerfile · .env.sample     build and run
 ├── README.md                               the SCS README (shape in CLAUDE.md)
@@ -55,12 +57,12 @@ src/
 ```
 ui/
 ├── index.tsx        bundle entry: imports styles.css, re-exports the Plugin (bundle SCSs)
-├── plugin.tsx       { mount, unmount, update } and the React root (bundle SCSs)
+├── plugin.tsx       { mount, unmount, update } and the React root (plugin SCSs)
 ├── app.tsx          root component: reads the route and renders a page
 ├── route.ts         parse and build the SCS's URLs
 ├── rpc.ts           typed wrappers over host.call, one per method
 ├── i18n.ts          en/ko strings
-├── styles.css       the SCS's Tailwind entry
+├── styles.css       the SCS's Tailwind entry (bundle SCSs)
 ├── pages/           one screen per route
 ├── components/      components shared by pages
 ├── hooks/           custom React hooks, one per file
@@ -91,7 +93,7 @@ ui/
 - A hook owns the server state it loads and the mutations on it. A mutation method on the hook
   calls the server, then updates the hook's state so every consumer re-renders, and refetches
   when the server may have changed more than the reply shows.
-- Plugin bundles: hooks call `rpc.ts` (`host.call`). They never import react-query or
+- Plugin UIs: hooks call `rpc.ts` (`host.call`). They never import react-query or
   `@biyard/bff-client` hooks. A mutation writes the server's reply into local state and bumps a
   reload nonce.
 - Host pages (`services/workspace`): server state comes from the generated `@biyard/bff-client`
@@ -140,7 +142,8 @@ ui/
 
 - README rows updated for any new method, event, table, peer or setting.
 - `make gen-ts` run after changing a route macro or a ts-rs type; the output is never committed.
-- Version bumped in `package.json` when the bundle's contents change (see CLAUDE.md "Versions").
+- Version bumped in `package.json` when a versioned bundle's contents change (see CLAUDE.md
+  "Versions"); built-in `services/dataroom` and `services/assessment` are never bumped.
 - A Playwright step in the persona journey that uses the feature
   (`playwright/tests/scenarios/*.spec.ts`), not a new per-feature spec.
 - Scope: one primary SCS; each secondary SCS 20 lines or fewer, or split or justified
