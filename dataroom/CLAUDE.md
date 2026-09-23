@@ -3,7 +3,8 @@
 Dataroom is a monorepo of self-contained systems (SCS). Each SCS owns its tables, its backend
 and, where it has one, its UI, and talks to the others only over gRPC and typed Kafka events.
 Code review enforces every rule below; write code that already satisfies them. How a PR is
-reviewed against these rules is in [CODE_REVIEW.md](CODE_REVIEW.md).
+opened and carried to green is in [PULL_REQUEST.md](PULL_REQUEST.md); how it is reviewed
+against these rules is in [CODE_REVIEW.md](CODE_REVIEW.md).
 
 ## Before you start
 
@@ -210,7 +211,12 @@ fixes, minor for features). Backend-only changes and changes to other SCSs do no
 
 ## Pull requests
 
-PRs target `dev`. Before opening one, check:
+PRs target `dev`. Read [`PULL_REQUEST.md`](PULL_REQUEST.md) (next to this file) before opening
+one, and follow it to the end: it covers creating the PR with `gh`, replying to and resolving
+review comments (a comment that was already considered and intended gets a by-design reply and
+stays open; only fixed comments get resolved), and watching CI until every check is green.
+
+Before opening one, check:
 
 - [ ] Scope: one primary SCS; each secondary SCS ≤ 20 lines, or split / justified as above.
 - [ ] Version bumped for every plugin bundle whose contents changed.
