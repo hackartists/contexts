@@ -9,8 +9,8 @@ in any `services/<name>` or `plugins/<name>`. It adds to `CLAUDE.md`, `docs/arch
 
 - One directory that owns its tables, its backend and, when it has one, its UI.
 - `services/<name>` are core systems every workspace gets; `plugins/<name>` are features a space
-  opts into. `services/dataroom` and `services/assessment` are also built-in plugins
-  (`manifest.json`), compiled into the console instead of shipping a bundle.
+  opts into. `services/dataroom` and `services/assessment` are not plugins: their `ui/` is a
+  library the console renders as fixed routes (`data-rooms/*`, `assessments/*`), with no bundle.
 - Its backend talks to other systems only over gRPC and typed Kafka events. It never links
   another system's crate, and reads another system's table only through a
   `#[postgres(skip_schema)]` mirror.
@@ -23,7 +23,6 @@ in any `services/<name>` or `plugins/<name>`. It adds to `CLAUDE.md`, `docs/arch
 <name>/
 ├── Cargo.toml · build.rs · proto/          backend crate and its gRPC contract
 ├── package.json · meta.ts · vite.config.ts UI package and bundle meta (bundle SCSs)
-├── manifest.json                           plugin manifest (built-in SCSs, no bundle)
 ├── public/                                 static assets copied into the bundle
 ├── Makefile · Dockerfile · .env.sample     build and run
 ├── README.md                               the SCS README (shape in CLAUDE.md)
@@ -57,7 +56,7 @@ src/
 ```
 ui/
 ├── index.tsx        bundle entry: imports styles.css, re-exports the Plugin (bundle SCSs)
-├── plugin.tsx       { mount, unmount, update } and the React root (plugin SCSs)
+├── plugin.tsx       { mount, unmount, update } and the React root (bundle SCSs)
 ├── app.tsx          root component: reads the route and renders a page
 ├── route.ts         parse and build the SCS's URLs
 ├── rpc.ts           typed wrappers over host.call, one per method
@@ -143,7 +142,7 @@ ui/
 - README rows updated for any new method, event, table, peer or setting.
 - `make gen-ts` run after changing a route macro or a ts-rs type; the output is never committed.
 - Version bumped in `package.json` when a versioned bundle's contents change (see CLAUDE.md
-  "Versions"); built-in `services/dataroom` and `services/assessment` are never bumped.
+  "Versions"); `services/dataroom` and `services/assessment` are never bumped.
 - A Playwright step in the persona journey that uses the feature
   (`playwright/tests/scenarios/*.spec.ts`), not a new per-feature spec.
 - Scope: one primary SCS; each secondary SCS 20 lines or fewer, or split or justified

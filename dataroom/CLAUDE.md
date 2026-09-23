@@ -25,7 +25,7 @@ Inside one SCS, frontend and backend live side by side:
 - `<name>/ui`: frontend (React + Vite). UI code goes nowhere else.
 - `<name>/src`: backend (Rust). Backend code goes nowhere else.
 - The SCS root holds only build and contract files: `proto/`, `public/`, `Makefile`,
-  `Cargo.toml`, `package.json`, `meta.ts` or `manifest.json`, vite/vitest configs, `README.md`.
+  `Cargo.toml`, `package.json`, `meta.ts`, vite/vitest configs, `README.md`.
 
 Read [`SCS.md`](SCS.md) (next to this file) before adding or moving code in an SCS. It sets the
 layout inside `src/` and `ui/`: `ui/` is split into `pages/`, `components/`, `hooks/`, `utils/`
@@ -200,8 +200,8 @@ Only the SCSs that ship a plugin bundle (`meta.ts`) are versioned: `plugins/revi
 `plugins/vc`. A PR that changes what goes into one of those bundles (its `ui/`, `meta.ts`,
 `public/`) bumps that SCS's `version` in its `package.json` (patch for fixes, minor for
 features). Backend-only changes and changes to other SCSs do not bump. `services/dataroom` and
-`services/assessment` are built-in plugins (`manifest.json`, version `"builtin"`): they ship with
-the console build and are never bumped.
+`services/assessment` are not plugins: the console imports their `ui/` as fixed routes and they
+are never bumped.
 
 - The bundle is published to `{id}/{version}/`, and `scripts/publish-plugin-bundle.sh` refuses
   to overwrite a published version with a different bundle, so a missed bump fails the
