@@ -23,19 +23,29 @@ Monorepo.
 | Path | What it holds |
 |---|---|
 | `app/` | Flutter app (iOS + Android only, no web target) |
-| `server/` | Backend API (Rust, axum) with Postgres |
-| `web/` | QR landing page and Universal Link / App Link association files |
+| `server/` | Backend API (Rust, axum) with Postgres. Serves data only, no pages |
+| `web/` | React (Vite) CSR app, deployed as static files: QR landing page and `/.well-known` Universal Link / App Link association files |
 
 ## Stack
 
 - App: Flutter, iOS and Android.
 - Backend: own server, Rust (axum) + Postgres. All business rules (attendance window,
   duplicate attendance, connection requests) are enforced on the server.
+- Web: React CSR only, no SSR. It fetches from the server API. Serve
+  `/.well-known/apple-app-site-association` as `application/json` without redirects.
+- QR codes are generated on the client from the session link; the server never renders QR.
 - Push: Firebase Cloud Messaging only, sent from the server. No other Firebase product.
 - Files (session slides): S3-compatible storage managed by the server.
 - Auth: email verification code only, no passwords, same flow as dataroom
   (`send_code` -> `verify_code` -> server-issued session). The app stores the session token in
   Keychain/Keystore and the session is extended on use, so users stay logged in.
+
+## Design
+
+- Bento layout. Tone: business and trustworthy (Apple / Toss style): light background,
+  restrained color.
+- References: iOS widgets and Control Center (module sizes), Toss (Korean typography,
+  density), Luma (session detail, QR check-in flow).
 
 ## MVP scope
 
