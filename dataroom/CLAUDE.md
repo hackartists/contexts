@@ -196,22 +196,21 @@ Every `services/<name>/README.md` and `plugins/<name>/README.md` follows the sha
 
 ## Versions
 
-Only the SCSs that ship a plugin bundle (`meta.ts`) are versioned: `plugins/review` and
-`plugins/vc`. A PR that changes what goes into one of those bundles (its `ui/`, `meta.ts`,
-`public/`) bumps that SCS's `version` in its `package.json` (patch for fixes, minor for
-features). Backend-only changes and changes to other SCSs do not bump. `services/dataroom` and
-`services/assessment` are not plugins: the console imports their `ui/` as fixed routes and they
-are never bumped.
+As of PR #158 (`feat/plugin-bundle-ci-rolling-version`, merged to `dev`), plugin bundle versions
+are no longer manually tracked. Do not bump `plugins/review/package.json` or
+`plugins/vc/package.json` for a bundle change — CI resolves the published bundle version
+automatically from `$PLUGIN_BUNDLE_VERSION` (set to the commit's short SHA in
+`.github/workflows/ci.yml`), falling back to `"dev"` locally. `package.json`'s `version` field is
+now a plain npm package version, unrelated to the published bundle version; leave it alone in a
+feature PR. `services/dataroom` and `services/assessment` are not plugins: the console imports
+their `ui/` as fixed routes and they have no bundle version at all.
 
-- The bundle is published to `{id}/{version}/`, and `scripts/publish-plugin-bundle.sh` refuses
-  to overwrite a published version with a different bundle, so a missed bump fails the
-  `plugin-bundle` CI job on `dev`.
-- A change to shared UI code a bundle includes (`packages/components`, `packages/plugin-host`)
-  also changes those bundles: bump every plugin that uses it. The same holds for
-  `services/dataroom/ui` and `services/assessment/ui`: `plugins/review` (and `plugins/vc` when it
-  imports them) compiles that code in, so a change there bumps them.
-- Bump against the version on `dev` at merge time; if `dev` moved past your bump, bump again
-  after merging it in.
+- The bundle is published to `{id}/{version}/`, and `scripts/publish-plugin-bundle.sh` refuses to
+  overwrite an existing `{id}/{version}/` prefix with different content (re-running CI for the
+  same commit is a safe no-op).
+- A change to shared UI code a bundle includes (`packages/components`, `packages/plugin-host`,
+  `services/dataroom/ui`, `services/assessment/ui`) needs no version bump either — the next commit
+  SHA on `dev` publishes a new bundle version automatically.
 
 ## Pull requests
 
@@ -223,8 +222,8 @@ stays open; only fixed comments get resolved), and watching CI until every check
 Before opening one, check:
 
 - [ ] Scope: one primary SCS; each secondary SCS ≤ 20 lines, or split / justified as above.
-- [ ] Version bumped for every versioned plugin bundle (`plugins/review`, `plugins/vc`) whose
-      contents changed.
+- [ ] No manual plugin bundle version bump (`plugins/review`, `plugins/vc` `package.json`) — CI
+      resolves the published bundle version from the commit SHA automatically.
 - [ ] No comments in touched source files.
 - [ ] No inline test modules; no inline string errors.
 - [ ] No new BFF feature routes; no generated TypeScript committed.
