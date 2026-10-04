@@ -71,6 +71,30 @@ If a secondary SCS exceeds 20 lines, tell the user and add this section to the P
   2. <option>: <why chosen>
 ```
 
+## Software design
+
+- **Scope-visible layout**: a file's directory path must show its scope on its own, without
+  reading the code. When a concept's implementation grows past one file, give it its own
+  directory named after the concept, and put everything scoped to it inside — e.g.
+  `formula_spec/lookup_forward_min/` holding `mod.rs`, its own `tests.rs`, and a
+  `scalar_aggregation_fn.rs` submodule used only by that formula. A helper used by exactly one
+  consumer lives inside that consumer's directory; only promote it to a shared location (its
+  parent module, `packages/*`) once a second consumer actually needs it.
+- **Minimal-change extension points**: when a feature is, by nature, one concept with several
+  interchangeable kinds — a new kind must be addable later by adding a file/variant/impl, not by
+  editing a shared `match`/`if` chain across multiple files. Recognise this shape and reach for a
+  factory/trait pattern (one trait or enum-of-structs, one file per kind, a single registration
+  point) at first implementation, not as a later refactor:
+  - Backend: `data_view_schema`'s widget kinds and `value_specs`' value-spec kinds are the
+    reference shape — each kind is its own file implementing a shared trait, dispatched from one
+    enum.
+  - Frontend: a Combobox/Dropdown (or similar single-choice control) whose selected option
+    changes the main logic/flow downstream (not just a label or a filter) is a signal to
+    consider the same trait-of-kinds shape, rather than branching on the selected value inline
+    at every call site.
+  - Do not over-apply this: a fixed, closed set of cases with no plausible future kind (e.g. a
+    boolean toggle) stays a plain `match`/`if`.
+
 ## No comments in source
 
 No comments or doc comments in `.rs`, `.ts`, `.tsx`, `.css`, `.proto`, Makefile, YAML or shell
