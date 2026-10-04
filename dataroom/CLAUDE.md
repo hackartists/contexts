@@ -94,6 +94,17 @@ If a secondary SCS exceeds 20 lines, tell the user and add this section to the P
     at every call site.
   - Do not over-apply this: a fixed, closed set of cases with no plausible future kind (e.g. a
     boolean toggle) stays a plain `match`/`if`.
+- **Frontend/backend naming consistency**: when a UI file is the frontend counterpart of a
+  backend concept, their names make that link obvious without reading either file.
+  - Exact match: when the UI file is a direct, 1:1 counterpart of one backend type, reuse its
+    name exactly — `src/data_view_schema/value_specs/formula_spec.rs`'s `FormulaSpec` enum
+    pairs with `ui/data_view/value_specs/formula-spec.tsx`'s `FormulaSpec`.
+  - Partial match: when the UI file covers a broader or narrower slice (a widget that renders
+    one schema type, a hook that wraps one service), keep enough of the backend name that the
+    link is still obvious at a glance — `src/data_view_schema/field_schema.rs` pairs with
+    `ui/data_view/widgets/field-widget.tsx`, not an unrelated name like `simple-input.tsx`.
+  - This is a naming rule, not a layout rule: it does not require mirroring the backend's
+    directory structure 1:1 in `ui/`, only that the type/file name itself carries the link.
 
 ## No comments in source
 
@@ -250,6 +261,8 @@ Before opening one, check:
       concept once it outgrows one file; single-consumer helpers stay inside that consumer).
 - [ ] A new interchangeable-kind feature uses a factory/trait extension point (one file/impl
       per kind), not a shared match/if chain repeated at every call site.
+- [ ] New or renamed UI files that are the frontend counterpart of a backend type/concept
+      carry a name that makes the link obvious (exact match when 1:1, partial match otherwise).
 - [ ] No manual plugin bundle version bump (`plugins/review`, `plugins/vc` `package.json`) — CI
       resolves the published bundle version from the commit SHA automatically.
 - [ ] No comments in touched source files.
