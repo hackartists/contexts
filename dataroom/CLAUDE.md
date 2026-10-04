@@ -246,6 +246,10 @@ stays open; only fixed comments get resolved), and watching CI until every check
 Before opening one, check:
 
 - [ ] Scope: one primary SCS; each secondary SCS ≤ 20 lines, or split / justified as above.
+- [ ] Directory layout makes each file's scope visible on its own (dedicated directory per
+      concept once it outgrows one file; single-consumer helpers stay inside that consumer).
+- [ ] A new interchangeable-kind feature uses a factory/trait extension point (one file/impl
+      per kind), not a shared match/if chain repeated at every call site.
 - [ ] No manual plugin bundle version bump (`plugins/review`, `plugins/vc` `package.json`) — CI
       resolves the published bundle version from the commit SHA automatically.
 - [ ] No comments in touched source files.

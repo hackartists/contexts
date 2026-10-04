@@ -81,6 +81,27 @@ review and report each one.
   and a Playwright step in the persona journey (`playwright/tests/scenarios/*.spec.ts`)
   rather than a new per-feature spec.
 
+**Software design: scope-visible layout and extension points**
+
+- Scope-visible layout: when the diff adds a second (or later) file implementing the same
+  concept as an existing one but does not give that concept its own directory, flag it and
+  name the directory to create (reference: `formula_spec/lookup_forward_min/` with its own
+  `mod.rs`/`tests.rs`/private submodule). Flag a helper placed in a shared/parent location
+  when the diff's own code is still its only consumer; it belongs inside that consumer's
+  directory until a second consumer appears.
+- Minimal-change extension points: when the diff adds a new "kind" of an existing one-concept-
+  many-kinds feature (a new widget kind, a new value-spec kind, a new formula, a new chart
+  type and similar) by editing a shared `match`/`if` spread across multiple call sites instead
+  of adding one file/variant/impl behind the existing trait or enum dispatch, flag it and name
+  the existing dispatch point to extend instead (reference: `data_view_schema`'s widget kinds,
+  `value_specs`' value-spec kinds).
+- On the frontend, when the diff adds a Combobox/Dropdown/similar single-choice control whose
+  selected option branches the main logic or flow downstream (not just a label or a filter) by
+  inlining the branch at the call site, flag it as a trait-of-kinds candidate, naming the
+  existing pattern to follow if the SCS already has one.
+- Do not flag a plain `match`/`if` over a fixed, closed set of cases with no plausible future
+  addition (e.g. a boolean toggle) — this is not a factory/trait candidate.
+
 **UX flow** (`UX.md`)
 
 - For a PR that adds or changes a user-facing flow, check it against the three perspectives in
