@@ -101,6 +101,14 @@ review and report each one.
   existing pattern to follow if the SCS already has one.
 - Do not flag a plain `match`/`if` over a fixed, closed set of cases with no plausible future
   addition (e.g. a boolean toggle) — this is not a factory/trait candidate.
+- Frontend/backend naming consistency: when the diff adds or renames a UI file that is the
+  frontend counterpart of a backend type/concept it touches, check the name makes that link
+  obvious. A 1:1 counterpart should reuse the backend type's name exactly (e.g. a `FormulaSpec`
+  enum in the Rust side paired with a UI file/type also named `FormulaSpec`). A partial
+  counterpart (a widget for one schema kind, a hook wrapping one service) should keep enough
+  of the backend name to be recognisable (e.g. `field_schema.rs` paired with
+  `field-widget.tsx`, not an unrelated name). Flag a UI file whose name gives no hint which
+  backend concept it renders or wraps, naming the backend file/type to align it with.
 
 **UX flow** (`UX.md`)
 
