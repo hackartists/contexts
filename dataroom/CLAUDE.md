@@ -270,6 +270,6 @@ Before opening one, check:
 - [ ] No new BFF feature routes; no generated TypeScript committed.
 - [ ] No spec, plan or code-narrating docs added.
 - [ ] New or moved UI code follows the `SCS.md` layout; custom hooks are in `ui/hooks/`.
-- [ ] Screens follow `UI.md`: flat surfaces, shadows only on floating layers, colour for state only, no product-UI gradients.
+- [ ] Screens follow `UI.md`: flat surfaces, no prominent borders (`shadow-e1` or near-surface fill instead), stronger shadows only on floating layers, colour for state only, no product-UI gradients.
 - [ ] User-facing flows follow `UX.md`: next step legible; unasked-for actions ignorable and reversible; delegated actions have range, review and undo.
 - [ ] Mobile changes follow `MOBILE.md`; desktop render unchanged.
