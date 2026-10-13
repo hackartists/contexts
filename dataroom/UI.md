@@ -12,8 +12,14 @@
 > **Flat design with a measured amount of depth added back — subtle shadow, layering and
 > motion used only to restore the affordance that pure flat design removed.**
 
-면은 평평하게, 경계는 1px border 로 만든다. **그림자는 떠 있는 레이어에만** 쓴다 —
-popover · dropdown · modal. 카드 · 표 · 입력 필드에는 쓰지 않는다.
+면은 평평하게 둔다. **도드라지는 border 로 경계를 긋지 않는다.** 경계가 필요하면 둘 중 하나로
+느낌만 낸다.
+
+- `shadow-e1` 로 아주 옅은 그림자 경계를 준다.
+- 배경과 비슷한 filled 색상(`bg-muted` 계열)으로 면을 구분한다.
+
+`shadow-e1` 보다 진한 그림자(`shadow-e2` 이상)는 떠 있는 레이어(popover · dropdown · modal ·
+슬라이드 패널)에만 쓴다. 표의 행 구분처럼 선이 꼭 필요하면 `border-border/50` 수준으로 옅게 한다.
 
 ### Minimalism
 
