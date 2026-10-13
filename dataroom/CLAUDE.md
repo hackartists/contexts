@@ -161,9 +161,9 @@ separate components behind one clear branch.
 
 ## Data modeling
 
-- Exactly one owning service migrates each table. Any other service reads it only through a
-  `#[postgres(skip_schema)]` mirror whose columns are a strict subset of the owner's.
-- Cross-service foreign keys are limited to `workspaces(id)`.
+- Design relationally first. Model every relationship as its own column or link table with a foreign key and an explicit `on_delete` (`CASCADE` when the child has no meaning without the parent, `RESTRICT` otherwise). Do not keep references inside JSON columns or as untyped `String` ids, and do not replace a foreign key with application-side or event-driven cleanup.
+- All services share one database, so a foreign key may point at a table another service owns. Reference that table's primary key, and add the mirror only if you also read it.
+- Exactly one owning service migrates each table. Any other service reads it only through a `#[postgres(skip_schema)]` mirror whose columns are a strict subset of the owner's.
 - Do not store values derivable by aggregate queries (sum, count, avg); compute them on demand.
 - Add indexes that cover every query you introduce or change.
 
@@ -269,6 +269,7 @@ Before opening one, check:
 - [ ] No inline test modules; no inline string errors.
 - [ ] No new BFF feature routes; no generated TypeScript committed.
 - [ ] No spec, plan or code-narrating docs added.
+- [ ] Relationships are foreign keys with an explicit `on_delete`, not ids in JSON or event-driven cleanup.
 - [ ] New or moved UI code follows the `SCS.md` layout; custom hooks are in `ui/hooks/`.
 - [ ] Screens follow `UI.md`: flat surfaces, no prominent borders (`shadow-e1` or near-surface fill instead), stronger shadows only on floating layers, colour for state only, no product-UI gradients.
 - [ ] User-facing flows follow `UX.md`: next step legible; unasked-for actions ignorable and reversible; delegated actions have range, review and undo.
