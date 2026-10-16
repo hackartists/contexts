@@ -122,6 +122,10 @@ acts unasked — keep it ignorable and reversible) and **Delegation** (the user 
 bounded scope — give it range, review and undo). Apply it when reviewing a PR that adds
 or changes a user-facing flow.
 
+Plain "dataroom UX" or "draw.io" refers to the user journey map:
+`~/Library/CloudStorage/GoogleDrive-miner@biyard.co/Shared drives/Biyard/Services/Dataroom/Dataroom - User Journey Map.drawio`.
+Other `.drawio` files in that folder, such as `마켓플레이스 워크플로우.drawio`, cover the UX of a single feature.
+
 ## Mobile web
 
 Read [`MOBILE.md`](MOBILE.md) (next to this file) before any mobile web work, and apply it when
