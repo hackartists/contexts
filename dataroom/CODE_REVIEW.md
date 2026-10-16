@@ -59,19 +59,18 @@ reimplementing it?
 Check every section of the project rules against the diff. The notes below are how to
 review and report each one.
 
-**SCS scope**
+**PR scope**
 
-- Determine the primary SCS from `gh pr view <PR number> --json files` (per-file additions
-  and deletions): the SCS the PR's feature belongs to, normally the one with the most
-  changed lines.
-- For each secondary SCS over 20 lines, check that the PR description answers both
-  questions the rules require. If either is missing, flag it. Whether or not it is
-  explained, recommend splitting the secondary change into its own PR that lands first.
-- A secondary SCS within 20 lines is mentioned in the summary, not flagged as a defect.
-- Within the primary SCS, flag feature code placed outside `<name>/ui` (UI) or
-  `<name>/src` (backend) when the diff adds it.
-- Report scope findings ONCE, at the top of the summary body, listing each secondary SCS
-  or shared path with its changed-line count. No inline comments for them.
+- Read the "Scenario" section of the PR description. If it is missing, flag it.
+- Flag changes the scenario or task does not need (unrelated refactor, drive-by fix, a
+  second scenario) and recommend moving them to their own PR.
+- Flag a PR that carries only one SCS's or one layer's slice of a scenario when that slice
+  does not work end to end on its own.
+- Flag feature code placed outside `<name>/ui` (UI) or `<name>/src` (backend) when the diff
+  adds it.
+- Report scope findings ONCE, at the top of the summary body, listing each touched SCS or
+  shared path with its changed-line count (from `gh pr view <PR number> --json files`). No
+  inline comments for them.
 
 **SCS layout** (`SCS.md`)
 
@@ -230,7 +229,7 @@ is not worth the author's attention. Remove a comment if ANY of these is true:
   work beyond this PR's intent.
   - EXCEPTION: source-comment findings anywhere in a file the diff touches are in scope and
     survive pruning, even on lines the diff did not change.
-  - SCS scope findings and missing version bumps also always survive pruning.
+  - PR scope findings and missing version bumps also always survive pruning.
 - It is speculative ("this might break if...") without a concrete, plausible failure path
   in this codebase.
 - It restates a rule without an actual violation in the diff.

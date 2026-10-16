@@ -31,44 +31,35 @@ Read [`SCS.md`](SCS.md) (next to this file) before adding or moving code in an S
 layout inside `src/` and `ui/`: `ui/` is split into `pages/`, `components/`, `hooks/`, `utils/`
 and generated `types/`, and every custom React hook lives in `ui/hooks/`, one per file.
 
-## SCS scope
+## PR scope
 
-Implement a feature inside one SCS whenever possible. A PR is scoped to one **primary SCS**,
-the one the feature belongs to. Every other SCS the diff touches (`services/bff` included) is a
-**secondary SCS**.
+A PR is scoped to one **user scenario** (something a user can now do end to end, e.g. "a
+reviewer comments on a data room file") or one **task** (a bug fix, refactor or chore with a
+single goal). A reviewer must be able to grasp the whole concept from that one PR.
 
-- Count changed lines (additions + deletions) per secondary SCS, ignoring generated files and
-  lockfiles (`Cargo.lock`, `pnpm-lock.yaml`).
-- **20 lines or fewer** per secondary SCS: allowed when genuinely needed.
-- **More than 20 lines** in a secondary SCS: requires human sign-off. Prefer splitting it into
-  its own PR that lands first, with the feature PR stacked on top. If it stays, the PR
-  description must answer:
-  - Why did the change to the other SCS have to exceed 20 lines?
-  - Which options were considered, and why was this one chosen?
-- **`packages/`**: changes to shared code go in their own PR (stacked below or separate) so they
-  are reviewed on their own.
-- **Repository wiring** (`infra/helm`, `docker-compose.yaml`, root `Cargo.toml`,
-  `pnpm-workspace.yaml`, `scripts/`): expected when adding a new SCS; otherwise it counts like a
-  secondary SCS.
-- **`playwright/`** tests that exercise the primary SCS's feature count as the primary SCS.
+- Include every SCS the scenario needs (backend, BFF wiring, UI, `packages/`, `playwright/`,
+  repository wiring) in the same PR. Never split a scenario by SCS or by layer.
+- SCS boundaries govern where code lives ([`SCS.md`](SCS.md)), not how PRs are cut. Still
+  implement inside one SCS whenever possible, and keep each piece in the SCS that owns it.
+- Split only along scenario lines: anything the scenario does not need (an unrelated
+  refactor, a drive-by fix, a second scenario) goes in its own PR.
+- When one scenario is too large to review, cut it into smaller scenarios that each work end
+  to end on their own (vertical slices), never into per-SCS or per-layer PRs.
 
-Per-path line counts for the current branch:
+The PR description carries this section:
+
+```markdown
+## Scenario
+
+- **Scenario / task:** <who does what, or the single goal>
+- **Touched SCSs:**
+  - `services/<name>`: <its role in the scenario>
+```
+
+List the touched SCSs with per-path changed-line counts for the current branch:
 
 ```bash
 git diff --numstat origin/dev...HEAD -- . ':!**/Cargo.lock' ':!pnpm-lock.yaml' | awk '{split($3,p,"/"); k=(p[1]=="services"||p[1]=="plugins"||p[1]=="packages")?p[1]"/"p[2]:p[1]; s[k]+=$1+$2} END {for (k in s) print s[k], k}' | sort -rn
-```
-
-If a secondary SCS exceeds 20 lines, tell the user and add this section to the PR description:
-
-```markdown
-## Out-of-scope changes (> 20 lines)
-
-- **Primary SCS:** services/<name>
-- **Secondary changes:** <path>: <changed lines>
-- **Why more than 20 lines was necessary:** <reason>
-- **Options considered:**
-  1. <option>: <why rejected>
-  2. <option>: <why chosen>
 ```
 
 ## Software design
@@ -256,7 +247,7 @@ stays open; only fixed comments get resolved), and watching CI until every check
 
 Before opening one, check:
 
-- [ ] Scope: one primary SCS; each secondary SCS ≤ 20 lines, or split / justified as above.
+- [ ] Scope: one user scenario or task; every SCS it needs is in this PR; nothing unrelated to it.
 - [ ] Directory layout makes each file's scope visible on its own (dedicated directory per
       concept once it outgrows one file; single-consumer helpers stay inside that consumer).
 - [ ] A new interchangeable-kind feature uses a factory/trait extension point (one file/impl

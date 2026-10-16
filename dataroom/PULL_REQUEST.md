@@ -12,7 +12,7 @@ resolved or answered as by design, and every CI check is green.
 
 - Work through the checklist at the end of `CLAUDE.md` ("Pull requests"). Every box is a
   finding the reviewer will raise if it is not already true.
-- Count the per-path diff and decide the primary SCS:
+- List the SCSs the scenario touches, for the "Scenario" section:
 
   ```bash
   git diff --numstat origin/dev...HEAD -- . ':!**/Cargo.lock' ':!pnpm-lock.yaml' | awk '{split($3,p,"/"); k=(p[1]=="services"||p[1]=="plugins"||p[1]=="packages")?p[1]"/"p[2]:p[1]; s[k]+=$1+$2} END {for (k in s) print s[k], k}' | sort -rn
@@ -50,6 +50,12 @@ gh pr create --base dev --head <branch> --title '<title>' --body-file <file>
 The body carries what the code cannot say, and nothing the code already says:
 
 ```markdown
+## Scenario
+
+- **Scenario / task:** <who does what, or the single goal>
+- **Touched SCSs:**
+  - `services/<name>`: <its role in the scenario>
+
 ## What this changes
 
 <what a user can now do, or what stops being broken>
@@ -63,10 +69,11 @@ The body carries what the code cannot say, and nothing the code already says:
 <the steps a reviewer follows, or the preview route to open>
 ```
 
-Add sections only when the rules demand them:
+"Scenario" is required; it follows the `CLAUDE.md` "PR scope" section, one scenario or task
+per PR with every SCS it needs.
 
-- **Out-of-scope changes** — a secondary SCS over 20 lines. Use the exact template in the
-  `CLAUDE.md` "SCS scope" section; the reviewer checks that both questions are answered.
+Add other sections only when the rules demand them:
+
 - **New BFF code** — say why the browser needs a REST shape `core_rpc.rs` / `plugin_rpc.rs`
   cannot give it.
 - **Version bumps** — list each plugin bundle bumped and the version it moved to.
@@ -208,7 +215,7 @@ The PR is finished when all of these hold:
 - [ ] Every review thread is resolved (fixed) or answered as by design (left open).
 - [ ] Every fix is pushed, and the reply on its thread names the commit.
 - [ ] `gh pr checks "$PR"` reports every check green.
-- [ ] The description still matches the code after the review round — the out-of-scope,
+- [ ] The description still matches the code after the review round — the scenario,
       BFF and version sections included.
 
 Report to the user: the PR URL, what was fixed from review, what was answered as by design

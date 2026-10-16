@@ -145,5 +145,4 @@ ui/
   "Versions"); `services/dataroom` and `services/assessment` are never bumped.
 - A Playwright step in the persona journey that uses the feature
   (`playwright/tests/scenarios/*.spec.ts`), not a new per-feature spec.
-- Scope: one primary SCS; each secondary SCS 20 lines or fewer, or split or justified
-  (CLAUDE.md "SCS scope").
+- Scope: one user scenario or task, with every SCS it needs (CLAUDE.md "PR scope").
