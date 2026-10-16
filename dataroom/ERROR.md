@@ -92,7 +92,7 @@ missing; an `x-http-status` outside `400..=599` falls back to 502.
 
 | gRPC | HTTP | Message |
 |---|---|---|
-| `InvalidArgument`, `FailedPrecondition`, `OutOfRange`, `Unimplemented` | 400 | upstream message, or the code description when empty |
+| `InvalidArgument`, `FailedPrecondition`, `OutOfRange`, `Unimplemented` | 400 | upstream message; when empty, `the service does not implement {method_path}` for `Unimplemented`, otherwise the code description |
 | `PermissionDenied`, `Unauthenticated` | 403 | `forbidden` |
 | `NotFound` | 404 | `not found` |
 | `AlreadyExists`, `Aborted` | 409 | upstream message, or the code description |
