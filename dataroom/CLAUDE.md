@@ -135,16 +135,18 @@ separate components behind one clear branch.
   `type1_to_type2` / `from_x` / `to_x` helper functions.
 - **Reuse**: use existing macros and `packages/*` instead of repeating boilerplate or
   reimplementing what already exists.
-- **Errors** (`docs/conventions/error-handling.md`): never build an error inline from a string
-  (`Status::internal(format!(..))`, `Status::unknown(e.to_string())`); the frontend cannot
-  branch on it.
-  - gRPC: a domain error enum in the crate's `error.rs` (reference:
-    `services/dataroom/src/error.rs`) with one variant per failure the caller must distinguish,
-    plus `From<DomainError> for tonic::Status` mapping each variant to a chosen code:
-    `failed_precondition` for a refusal the user can act on, `permission_denied` only for
-    callers who should not be there at all.
-  - HTTP: an error enum with `Serialize + AsStatusCode`, never an `IntoResponse` impl.
-  - Internal-detail payloads carry `#[serde(skip)]`.
+- **Errors**: read [`ERROR.md`](ERROR.md) (next to this file) before adding or changing an
+  error; usage examples are in `packages/service-error/README.md`.
+  - Each service owns one error enum in its `error.rs` with `#[derive(thiserror::Error,
+    ServiceError)]`; every variant has `#[service_error(code = N, status = S)]`, one variant
+    per failure the caller must distinguish. Codes are per service and never renumbered.
+  - `#[error(..)]` is the public message. 5xx variants carry no detail; log it with
+    `tracing::error!` where the error is created.
+  - Never construct `tonic::Status` directly (blocked by `clippy.toml`), never hand-write
+    `From<E> for Status`, `IntoResponse` or `AsStatusCode`, never build an error inline from a
+    string, never add a catch-all `Failed(String)`.
+  - The browser receives `{service, code, message}`; UI shows it only through `describeError`,
+    with a `"{service}.{code:06}"` entry in the ko and en catalogs for each user-facing code.
 - **Tests**: unit tests go in a separate `tests.rs`, registered with `#[cfg(test)] mod tests;`
   (`foo.rs` → `foo/tests.rs`, `dir/mod.rs` → `dir/tests.rs`). No inline
   `mod tests { .. }` blocks; move any you find in a file you touch. This is stricter than
