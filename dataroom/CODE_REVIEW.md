@@ -162,6 +162,11 @@ under `packages/`):
   `tonic::Status`, or a catch-all variant, name the `ServiceError` variants (with next free code
   and status) the diff's failure cases imply so the author has a concrete starting point. Flag a
   renumbered code, a 5xx variant with fields, and a new code without a ko + en catalog entry.
+- Shorthand: flag a longhand form that has a shorter equivalent from CLAUDE.md's Rust
+  "Shorthand" rule (redundant `.map_err(X::from)?` before a `?` that already converts,
+  forwarding closures, unwrap-or-return `match`, `{ id: id }`), and quote the shorthand in the
+  comment. Report repeats of the same pattern once with the affected lines, not one comment
+  each. This is a recommendation, not blocking.
 - Tests: report inline test modules once, listing the affected files, rather than one
   comment per file.
 
