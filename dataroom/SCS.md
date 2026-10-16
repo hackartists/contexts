@@ -47,7 +47,8 @@ src/
 ```
 
 - Name modules after the domain aggregate, never after the transport.
-- Errors are a domain enum in `error.rs` mapped to `tonic::Status`; never an inline string.
+- Errors are one `ServiceError` enum in `error.rs`; the derive produces the `tonic::Status`. See
+  [`ERROR.md`](ERROR.md).
 - Unit tests go in `tests.rs` beside the module (`foo.rs` → `foo/tests.rs`).
 - Auth is checked per method in the SCS itself, even when the BFF already checked the workspace.
 

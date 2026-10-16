@@ -158,8 +158,10 @@ under `packages/`):
 
 **Rust**
 
-- Errors: when you flag an inline string error, name the error variants the diff's failure
-  cases imply so the author has a concrete starting point.
+- Errors: check against [`ERROR.md`](ERROR.md). When you flag an inline string error, a direct
+  `tonic::Status`, or a catch-all variant, name the `ServiceError` variants (with next free code
+  and status) the diff's failure cases imply so the author has a concrete starting point. Flag a
+  renumbered code, a 5xx variant with fields, and a new code without a ko + en catalog entry.
 - Tests: report inline test modules once, listing the affected files, rather than one
   comment per file.
 

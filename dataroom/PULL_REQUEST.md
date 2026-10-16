@@ -147,7 +147,7 @@ Reply in the language the comment was written in.
 - **By design**: open with `By design.` (or `의도된 동작입니다.`), then the reason in one or
   two sentences — what was considered, and why this way. No apology, no hedging.
 - **Fixed**: name what changed and the commit that changed it, e.g. "Fixed in `<sha>`: the
-  error is now a domain error variant instead of an inline string."
+  error is now a `ServiceError` variant instead of an inline string."
 
 For a review's top-level summary body, reply with `gh pr comment "$PR" --body '<reply>'`.
 

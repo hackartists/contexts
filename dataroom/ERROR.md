@@ -121,7 +121,7 @@ missing; an `x-http-status` outside `400..=599` falls back to 502.
 - Display only through `describeError(e, texts)` from `@biyard/plugin-host`. Never render
   `e.message`, never branch on a code, kind or message string to pick a text.
 - `describeError` order: not a `PluginRpcError` → unknown; status 0 → offline; 403 → forbidden;
-  catalog hit (with `{{message}}` replaced by `e.message`) ; missing key or code 0 → unknown.
+  catalog hit (with `{{message}}` replaced by `e.message`); missing key or code 0 → unknown.
 - `describeRefusal` returns the catalog text only for a non-403 4xx, else `null`; use it for inline
   refusals that should not show a generic error. `isForbiddenError` checks status 403.
 
