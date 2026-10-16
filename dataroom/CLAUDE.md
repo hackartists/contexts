@@ -143,8 +143,9 @@ separate components behind one clear branch.
   - `#[error(..)]` is the public message. 5xx variants carry no detail; log it with
     `tracing::error!` where the error is created.
   - Never construct `tonic::Status` directly (blocked by `clippy.toml`), never hand-write
-    `From<E> for Status`, `IntoResponse` or `AsStatusCode`, never build an error inline from a
-    string, never add a catch-all `Failed(String)`.
+    `From<E> for Status`, `IntoResponse` or `AsStatusCode` on an error enum (BFF's
+    `ErrorResponse` / `RpcError` own the wire shape), never build an error inline from a string,
+    never add a catch-all `Failed(String)`.
   - The browser receives `{service, code, message}`; UI shows it only through `describeError`,
     with a `"{service}.{code:06}"` entry in the ko and en catalogs for each user-facing code.
 - **Tests**: unit tests go in a separate `tests.rs`, registered with `#[cfg(test)] mod tests;`
@@ -259,7 +260,13 @@ Before opening one, check:
 - [ ] No manual plugin bundle version bump (`plugins/review`, `plugins/vc` `package.json`) — CI
       resolves the published bundle version from the commit SHA automatically.
 - [ ] No comments in touched source files.
-- [ ] No inline test modules; no inline string errors.
+- [ ] No inline test modules.
+- [ ] Errors follow `ERROR.md`: every new failure is a `ServiceError` variant with `code` and
+      `status`; existing codes unchanged; 5xx variants carry no detail and are logged where
+      created; no direct `tonic::Status`, no hand-written `From<E> for Status`, `IntoResponse` or
+      `AsStatusCode` on an error enum, and no inline string errors.
+- [ ] Each new user-facing error code has ko and en catalog entries, and UI shows errors only
+      through `describeError` (never `e.message` or a `kind` branch).
 - [ ] No new BFF feature routes; no generated TypeScript committed.
 - [ ] No spec, plan or code-narrating docs added.
 - [ ] Relationships are foreign keys with an explicit `on_delete`, not ids in JSON or event-driven cleanup.
