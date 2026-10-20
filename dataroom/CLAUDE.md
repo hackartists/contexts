@@ -26,8 +26,9 @@ Inside one SCS, frontend and backend live side by side:
 - `<name>/src`: backend (Rust). Backend code goes nowhere else.
 - `<name>/sdk`: the `<name>-sdk` crate holding the SCS's public contract (types, produced
   events, proto, error enum); the only crate of it another SCS may depend on.
-- The SCS root holds only build and contract files: `sdk/`, `proto/`, `public/`, `Makefile`,
-  `Cargo.toml`, `package.json`, `meta.ts`, vite/vitest configs, `README.md`.
+- The SCS root holds only build and contract files: `sdk/`, `public/`, `Makefile`,
+  `Cargo.toml`, `package.json`, `meta.ts`, vite/vitest configs, `README.md`. `proto/` and its
+  `build.rs` live in `sdk/`; only an SCS without an sdk keeps them at the root.
 
 Read [`SCS.md`](SCS.md) (next to this file) before adding or moving code in an SCS. It sets the
 layout inside `src/` and `ui/`: `ui/` is split into `pages/`, `components/`, `hooks/`, `utils/`
@@ -282,8 +283,11 @@ Before opening one, check:
       through `describeError` (never `e.message` or a `kind` branch).
 - [ ] Cross-SCS code depends only on `<name>-sdk`, never a server crate; sdk→sdk deps form a
       DAG; an sdk holds no DB, tokio, Kafka publishing or server logic, heavy parts behind features.
-- [ ] Event structs and all their field types are defined in the producer's sdk; per-type
-      behaviour is a trait impl in the owning sdk, not re-implemented by a consumer.
+- [ ] Event structs and all their field types are defined in the producer's sdk, never with a
+      consumer's or another SCS's type; per-type behaviour is a trait impl in the owning sdk,
+      not re-implemented by a consumer.
+- [ ] An SCS with an sdk has one `ServiceError` enum in `sdk/src/error.rs`, shared by sdk and
+      server; no separate sdk error type.
 - [ ] Events and gRPC messages carry sdk types, not JSON in `String` / `serde_json::Value`.
 - [ ] No new BFF feature routes; no generated TypeScript committed.
 - [ ] No spec, plan or code-narrating docs added.
