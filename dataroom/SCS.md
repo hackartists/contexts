@@ -21,8 +21,8 @@ in any `services/<name>` or `plugins/<name>`. It adds to `CLAUDE.md`, `docs/arch
 
 ```
 <name>/
-├── Cargo.toml · build.rs                   backend crate; its workspace has sdk/ as a member
-├── sdk/                                    <name>-sdk: the contract other SCSs use (SDK crate)
+├── Cargo.toml                              backend crate; its workspace has sdk/ as a member
+├── sdk/                                    <name>-sdk: the contract other SCSs use, proto/ + build.rs
 ├── package.json · meta.ts · vite.config.ts UI package and bundle meta (bundle SCSs)
 ├── public/                                 static assets copied into the bundle
 ├── Makefile · Dockerfile · .env.sample     build and run
@@ -31,7 +31,8 @@ in any `services/<name>` or `plugins/<name>`. It adds to `CLAUDE.md`, `docs/arch
 └── ui/                                     frontend, nothing else
 ```
 
-The root holds only build and contract files plus `sdk/`. Backend code never sits outside `src/`; UI code
+The root holds only build and contract files plus `sdk/`; an SCS without an sdk keeps
+`build.rs · proto/` at the root. Backend code never sits outside `src/`; UI code
 never sits outside `ui/`.
 
 ## Backend: `src/`
@@ -145,7 +146,8 @@ ui/
 An SCS that exposes a contract to other SCSs has `<name>/sdk/`, a package named `<name>-sdk`.
 
 - It holds the SCS's whole public contract: domain schema types other SCSs use, the event schemas
-  it produces, its gRPC proto with generated client and server, and its `ServiceError` enum.
+  it produces, its gRPC proto (`sdk/proto/`, compiled by the sdk's `build.rs`) with generated
+  client and server, and its `ServiceError` enum.
 - `packages/` keeps only code owned by no single SCS. Producer event crates
   (`packages/events/<producer>`) and per-service protos in `packages/dataroom-sdk` move into the
   owning SCS's sdk.

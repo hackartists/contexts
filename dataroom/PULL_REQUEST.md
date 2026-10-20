@@ -25,8 +25,14 @@ resolved or answered as by design, and every CI check is green.
   | Rust | `cargo check --workspace --all-features --all-targets && cargo test --workspace --all-features` | `packages`, `service` |
   | Generated TS | `make gen-ts`, then confirm the tree is still clean | `gen-ts` |
   | Frontend | `pnpm lint && pnpm typecheck && pnpm build && pnpm test` | `web` |
+  | SDK (in `<name>/` when its `sdk/` changed) | `cargo check -p <name>-sdk --no-default-features && cargo test -p <name>-sdk --all-features` | `service` |
+  | SDK dependents | `cargo check --all-features --all-targets && cargo test --all-features` in every SCS whose `Cargo.toml` depends on the changed `<name>-sdk` | `service` |
 
   CI sets `RUSTFLAGS: -D warnings`. A warning that is fine locally fails the build there.
+  `make gen-ts` covers sdk ts-rs types too; the `--no-default-features` check proves a
+  schema-only consumer builds without tonic, Kafka or Postgres.
+- A new or changed produced event or gRPC message: the SCS README `## Events` / `## Where it
+  sits` rows cite its `<name>-sdk` type path.
 - Push the branch: `git push -u origin <branch>`.
 
 ## Opening the PR
@@ -196,7 +202,8 @@ Common failures and where the fix goes:
 | Job | Usual cause | Fix |
 |---|---|---|
 | `packages` / `service` | A warning (`-D warnings`), or a test that needs the CI Postgres | Fix the warning or the test; never silence it with `#[allow]` |
-| `gen-ts` | A route macro or `ts-rs` type changed without regenerating | Run `make gen-ts`; the fix is in the Rust source, never in the generated file |
+| `service` (sdk) | An sdk builds only with a heavy feature on, or a dependent SCS was not rebuilt against the changed sdk | Gate the import behind the sdk's feature; fix the dependent in the same PR |
+| `gen-ts` | A route macro or `ts-rs` type (server or sdk) changed without regenerating | Run `make gen-ts`; the fix is in the Rust source, never in the generated file |
 | `web` | `pnpm lint` / `typecheck` / `test` | Fix in `ui/`; the eslint `ui-scales` rule is not negotiable |
 | `plugin-bundle` | A bundle's contents changed without a version bump | Bump the SCS's `package.json` `version` past what `dev` published |
 | `e2e` | A flow changed without its Playwright step | Update the persona journey in `playwright/tests/scenarios/*.spec.ts` |
@@ -214,7 +221,8 @@ The PR is finished when all of these hold:
 
 - [ ] Every review thread is resolved (fixed) or answered as by design (left open).
 - [ ] Every fix is pushed, and the reply on its thread names the commit.
-- [ ] `gh pr checks "$PR"` reports every check green.
+- [ ] `gh pr checks "$PR"` reports every check green, including the `service` job of every
+      SCS that depends on a changed sdk.
 - [ ] The description still matches the code after the review round — the scenario,
       BFF and version sections included.
 

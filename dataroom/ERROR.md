@@ -10,6 +10,11 @@ How a dataroom error is defined, carried to the browser and shown. Code of recor
 - Each SCS owns its error enum in `src/error.rs` (in `<name>/sdk` when the SCS has an sdk, shared
   by sdk and server; never a separate sdk error type), derived with
   `#[derive(thiserror::Error, service_error::ServiceError)]`. Never share an enum across SCSs.
+- In an sdk, the enum's `error.rs` is `sdk/src/error.rs`. The sdk depends on `service-error` with
+  `default-features = false` and enables `service-error/grpc` only from its `grpc-client` /
+  `grpc-server` features, so schema-only consumers do not pull tonic. The server enables them.
+- Sdk code that can fail (value parsing and validation in trait impls) returns a variant of that
+  enum, never `String`, `anyhow` or a local error type; the server propagates it with `?`.
 - Every variant carries `#[service_error(code = N, status = S)]`. The derive refuses to compile on:
   missing attribute, missing `code` or `status`, the attribute repeated, `code = 0` (reserved for
   unknown), `code > 999_999`, a code used twice in one enum, `status` outside `400..=599`, any key
@@ -23,7 +28,9 @@ How a dataroom error is defined, carried to the browser and shown. Code of recor
 - 4xx variants may interpolate a field (`{0}`) only when it is data the user can fix. The UI shows
   it only where the catalog entry has `{{message}}`.
 - Map a lower-level error into a variant with `impl From<LowerError> for DomainError`, logging
-  inside it when the target is 5xx.
+  inside it when the target is 5xx. When the enum is in the sdk, a `From` for a server-only
+  error (e.g. `sqlx::Error`) sits in the sdk behind the feature that pulls that dependency
+  (`postgres`); the orphan rule forbids it in the server crate.
 
 ```rust
 #[derive(Debug, Clone, thiserror::Error, service_error::ServiceError)]
@@ -40,7 +47,7 @@ pub enum EvaluationError {
 }
 ```
 
-(`services/assessment/src/error.rs`.)
+(`services/assessment/src/error.rs`; `services/assessment/sdk/src/error.rs` once it has an sdk.)
 
 ## Forbidden
 
@@ -48,7 +55,8 @@ pub enum EvaluationError {
   `tonic::Status::{new, with_details, with_metadata, with_details_and_metadata, ok, cancelled,
   unknown, invalid_argument, deadline_exceeded, not_found, already_exists, permission_denied,
   resource_exhausted, failed_precondition, aborted, out_of_range, unimplemented, internal,
-  unavailable, data_loss, unauthenticated, from_error}`. A new SCS copies that `clippy.toml`.
+  unavailable, data_loss, unauthenticated, from_error}`. A new SCS copies that `clippy.toml`; it
+  sits at the SCS root so it covers `sdk/` too.
 - Hand-written `From<E> for tonic::Status`, `IntoResponse` or `AsStatusCode` impls for an error;
   the derive generates the `Status` conversion.
 - Inline string errors (`format!(..)`, `e.to_string()` as the error).

@@ -66,8 +66,8 @@ review and report each one.
   second scenario) and recommend moving them to their own PR.
 - Flag a PR that carries only one SCS's or one layer's slice of a scenario when that slice
   does not work end to end on its own.
-- Flag feature code placed outside `<name>/ui` (UI) or `<name>/src` (backend) when the diff
-  adds it.
+- Flag feature code placed outside `<name>/ui` (UI), `<name>/src` (backend) or `<name>/sdk`
+  (contract) when the diff adds it.
 - Report scope findings ONCE, at the top of the summary body, listing each touched SCS or
   shared path with its changed-line count (from `gh pr view <PR number> --json files`). No
   inline comments for them.
@@ -79,6 +79,10 @@ review and report each one.
 - Check what a change carries: README rows for a new method, event, table, peer or setting,
   and a Playwright step in the persona journey (`playwright/tests/scenarios/*.spec.ts`)
   rather than a new per-feature spec.
+- SDK crate: flag a cross-SCS dependency on a server crate instead of its `<name>-sdk`, an sdk
+  depending on a server crate or pulling DB/tokio/Kafka outside a feature, an event field typed
+  with a consumer's or another SCS's type, a separate sdk error type, and JSON in `String` /
+  `serde_json::Value` where an sdk type exists.
 
 **Software design: scope-visible layout and extension points**
 
