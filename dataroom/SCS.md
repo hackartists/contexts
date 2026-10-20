@@ -11,9 +11,9 @@ in any `services/<name>` or `plugins/<name>`. It adds to `CLAUDE.md`, `docs/arch
 - `services/<name>` are core systems every workspace gets; `plugins/<name>` are features a space
   opts into. `services/dataroom` and `services/assessment` are not plugins: their `ui/` is a
   library the console renders as fixed routes (`data-rooms/*`, `assessments/*`), with no bundle.
-- Its backend talks to other systems only over gRPC and typed Kafka events. It never links
-  another system's crate, and reads another system's table only through a
-  `#[postgres(skip_schema)]` mirror.
+- Its backend talks to other systems only over gRPC and typed Kafka events. It may depend on
+  another system's `<name>-sdk` only, never on its server crate, and reads another system's
+  table only through a `#[postgres(skip_schema)]` mirror.
 - The browser reaches it only through `services/bff` (`CoreCall` for workspace, `PluginCall` for
   plugins). Adding a method never adds a BFF route.
 
@@ -21,7 +21,8 @@ in any `services/<name>` or `plugins/<name>`. It adds to `CLAUDE.md`, `docs/arch
 
 ```
 <name>/
-├── Cargo.toml · build.rs · proto/          backend crate and its gRPC contract
+├── Cargo.toml · build.rs                   backend crate; its workspace has sdk/ as a member
+├── sdk/                                    <name>-sdk: the contract other SCSs use (SDK crate)
 ├── package.json · meta.ts · vite.config.ts UI package and bundle meta (bundle SCSs)
 ├── public/                                 static assets copied into the bundle
 ├── Makefile · Dockerfile · .env.sample     build and run
@@ -30,7 +31,7 @@ in any `services/<name>` or `plugins/<name>`. It adds to `CLAUDE.md`, `docs/arch
 └── ui/                                     frontend, nothing else
 ```
 
-The root holds only build and contract files. Backend code never sits outside `src/`; UI code
+The root holds only build and contract files plus `sdk/`. Backend code never sits outside `src/`; UI code
 never sits outside `ui/`.
 
 ## Backend: `src/`
@@ -43,12 +44,12 @@ src/
 ├── models/      one #[derive(PostgresEntity)] per file, skip_schema mirrors alongside
 ├── services/    business logic and outbound clients
 ├── types/       DTOs shared by grpc/ and api/; ts-rs behind the ts-bridge feature
-└── events/      #[event] declarations and link()
+└── events/      link() and consumers; produced event schemas live in sdk/
 ```
 
 - Name modules after the domain aggregate, never after the transport.
-- Errors are one `ServiceError` enum in `error.rs`; the derive produces the `tonic::Status`. See
-  [`ERROR.md`](ERROR.md).
+- Errors are one `ServiceError` enum in `error.rs`, or in `sdk/` when the SCS has one; the derive
+  produces the `tonic::Status`. See [`ERROR.md`](ERROR.md).
 - Unit tests go in `tests.rs` beside the module (`foo.rs` → `foo/tests.rs`).
 - Auth is checked per method in the SCS itself, even when the BFF already checked the workspace.
 
@@ -133,10 +134,44 @@ ui/
 | Need | How |
 |---|---|
 | Browser calls this SCS | `PluginCall` / `CoreCall` through the BFF dispatchers; the UI uses `host.call` or `@biyard/bff-client` |
-| This SCS calls another | gRPC client in `src/services/`, internal methods authenticated with `dr-server-key` |
-| Tell others something happened | `#[event]` producer; consumers dedupe on `event_id` |
+| This SCS calls another | the callee's `<name>-sdk` client (`grpc-client`) wrapped in `src/services/`, internal methods authenticated with `dr-server-key` |
+| Tell others something happened | `#[event]` producer with its schema in the producer's sdk; consumers dedupe on `event_id` |
+| Use another SCS's domain types | depend on its `<name>-sdk`, schema-only (no heavy features) |
 | Read another SCS's data | `skip_schema` mirror with a strict subset of the owner's columns |
 | Show another SCS's UI | import its exposed UI module (as dataroom does with the assessment renderer) and call through the same host |
+
+## SDK crate
+
+An SCS that exposes a contract to other SCSs has `<name>/sdk/`, a package named `<name>-sdk`.
+
+- It holds the SCS's whole public contract: domain schema types other SCSs use, the event schemas
+  it produces, its gRPC proto with generated client and server, and its `ServiceError` enum.
+- `packages/` keeps only code owned by no single SCS. Producer event crates
+  (`packages/events/<producer>`) and per-service protos in `packages/dataroom-sdk` move into the
+  owning SCS's sdk.
+- Contract only: pure domain types plus behaviour attached to them. No DB access, no runtime
+  (tokio), no Kafka publishing, no other server logic.
+- Heavy parts sit behind features (`events`, `grpc-client`, `grpc-server`, `postgres`,
+  `ts-bridge`) so schema-only consumers do not pay for them.
+- The `ServiceError` enum is shared by sdk and server. Never add a separate sdk error type: codes
+  and status are part of the contract.
+- Event schemas are producer-owned: the event struct and every type in its fields are defined in
+  the producer's sdk. Never import a consumer's or another SCS's type to build an event; to carry
+  a value received from another SCS, define an own type and convert.
+- Types own their behaviour: per-type logic (prompt, answer JSON schema, value parsing and
+  validation) is a trait impl in the owning sdk. A consumer calls it and never re-implements it
+  from a type-label string (data-view widget extraction lives on `DataViewComponent` in
+  `assessment-sdk`; evaluation only calls it).
+- Typed values across boundaries: events and gRPC messages carry the sdk type, never JSON in a
+  `String` or a `serde_json::Value` (`payload: EvaluatedPayload`, not `payload_json: String`).
+- Dependencies: an sdk depends only on `packages/*` and lower-layer sdks, never on any server
+  crate. sdk→sdk edges form a DAG. Services may exchange events both ways, but a shared type lives
+  only in the lower-layer sdk.
+- The sdk is a separate package, not a lib/bin feature split of the server crate: Cargo detects
+  cycles per package, so feature gates cannot break one.
+- Build: the sdk is a member of its SCS's own cargo workspace (the root workspace excludes
+  `services/*`). CI runs sdk tests and rebuilds every SCS that depends on a changed sdk. Its ts-rs
+  output goes to the SCS's `ui/types/` through the SCS Makefile.
 
 ## What a change carries
 

@@ -24,7 +24,9 @@ Inside one SCS, frontend and backend live side by side:
 
 - `<name>/ui`: frontend (React + Vite). UI code goes nowhere else.
 - `<name>/src`: backend (Rust). Backend code goes nowhere else.
-- The SCS root holds only build and contract files: `proto/`, `public/`, `Makefile`,
+- `<name>/sdk`: the `<name>-sdk` crate holding the SCS's public contract (types, produced
+  events, proto, error enum); the only crate of it another SCS may depend on.
+- The SCS root holds only build and contract files: `sdk/`, `proto/`, `public/`, `Makefile`,
   `Cargo.toml`, `package.json`, `meta.ts`, vite/vitest configs, `README.md`.
 
 Read [`SCS.md`](SCS.md) (next to this file) before adding or moving code in an SCS. It sets the
@@ -83,8 +85,15 @@ git diff --numstat origin/dev...HEAD -- . ':!**/Cargo.lock' ':!pnpm-lock.yaml' |
     changes the main logic/flow downstream (not just a label or a filter) is a signal to
     consider the same trait-of-kinds shape, rather than branching on the selected value inline
     at every call site.
+  - Across SCSs: the kind's behaviour (prompt, answer schema, value parsing/validation) lives in
+    its trait impl in the owning sdk. A consuming SCS calls it; it never receives a type-label
+    string and re-implements the kinds in its own `match` (e.g. data-view widget extraction lives
+    on `DataViewComponent` in `assessment-sdk`; evaluation only calls it).
   - Do not over-apply this: a fixed, closed set of cases with no plausible future kind (e.g. a
     boolean toggle) stays a plain `match`/`if`.
+- **Typed values across boundaries**: event and gRPC contracts carry the sdk type, never JSON in a
+  `String` or a `serde_json::Value` when an sdk type exists (`payload: EvaluatedPayload`, not
+  `payload_json: String`). See [`SCS.md`](SCS.md) "SDK crate".
 - **Frontend/backend naming consistency**: when a UI file is the frontend counterpart of a
   backend concept, their names make that link obvious without reading either file.
   - Exact match: when the UI file is a direct, 1:1 counterpart of one backend type, reuse its
@@ -141,7 +150,7 @@ separate components behind one clear branch.
   reimplementing what already exists.
 - **Errors**: read [`ERROR.md`](ERROR.md) (next to this file) before adding or changing an
   error; usage examples are in `packages/service-error/README.md`.
-  - Each service owns one error enum in its `error.rs` with `#[derive(thiserror::Error,
+  - Each service owns one error enum in its `error.rs` (in `<name>/sdk` when it has one) with `#[derive(thiserror::Error,
     ServiceError)]`; every variant has `#[service_error(code = N, status = S)]`, one variant
     per failure the caller must distinguish. Codes are per service and never renumbered.
   - `#[error(..)]` is the public message. 5xx variants carry no detail; log it with
@@ -187,7 +196,7 @@ logic.
 - ts-rs output comes from `make gen-ts` and is gitignored; never commit or hand-edit it.
   (`services/workspace/types/methods.ts` is hand-written.)
 - `#[ts(export, export_to = "types/")]` is correct; each Makefile points `TS_RS_EXPORT_DIR` at
-  its SCS's `ui/`.
+  its SCS's `ui/`, for the server crate and its `sdk/` alike.
 - ts-rs derives sit behind `cfg_attr(feature = "ts-bridge", ..)`. A new crate that emits
   TypeScript needs a `gen-ts` Makefile target and a matching `.gitignore` entry.
 - Run `make gen-ts` after changing a route macro or a `ts-rs` type.
@@ -214,7 +223,7 @@ Every `services/<name>/README.md` and `plugins/<name>/README.md` follows the sha
 | `## Features` | Table `Feature \| What a user can do`, one row per user-visible capability |
 | `## Where it sits` | Table `Direction \| Peer \| How \| What for` for every gRPC, HTTP and Kafka peer, in and out |
 | `## Plugin methods` / API | Table `Method(s) \| Does \| Who may call`; group related methods in one row |
-| `## Events` | Table `Direction \| Topic \| Payload \| Consumer / producer`, plus delivery guarantees a caller relies on |
+| `## Events` | Table `Direction \| Topic \| Payload \| Consumer / producer`, Payload citing the `<name>-sdk` type path, plus delivery guarantees a caller relies on |
 | `## Data it owns` | Table `Table \| Holds`, described in domain terms, then who else reads it and how |
 | `## Not in this service` | Where neighbouring responsibilities live |
 | `## Running it` | Table `Setting \| Meaning` for env vars, operational pitfalls, then the `make` / `pnpm` commands |
@@ -271,6 +280,11 @@ Before opening one, check:
       `AsStatusCode` on an error enum, and no inline string errors.
 - [ ] Each new user-facing error code has ko and en catalog entries, and UI shows errors only
       through `describeError` (never `e.message` or a `kind` branch).
+- [ ] Cross-SCS code depends only on `<name>-sdk`, never a server crate; sdk→sdk deps form a
+      DAG; an sdk holds no DB, tokio, Kafka publishing or server logic, heavy parts behind features.
+- [ ] Event structs and all their field types are defined in the producer's sdk; per-type
+      behaviour is a trait impl in the owning sdk, not re-implemented by a consumer.
+- [ ] Events and gRPC messages carry sdk types, not JSON in `String` / `serde_json::Value`.
 - [ ] No new BFF feature routes; no generated TypeScript committed.
 - [ ] No spec, plan or code-narrating docs added.
 - [ ] Relationships are foreign keys with an explicit `on_delete`, not ids in JSON or event-driven cleanup.

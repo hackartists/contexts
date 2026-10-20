@@ -7,7 +7,8 @@ How a dataroom error is defined, carried to the browser and shown. Code of recor
 
 ## Definition
 
-- Each SCS owns its error enum in `src/error.rs`, derived with
+- Each SCS owns its error enum in `src/error.rs` (in `<name>/sdk` when the SCS has an sdk, shared
+  by sdk and server; never a separate sdk error type), derived with
   `#[derive(thiserror::Error, service_error::ServiceError)]`. Never share an enum across SCSs.
 - Every variant carries `#[service_error(code = N, status = S)]`. The derive refuses to compile on:
   missing attribute, missing `code` or `status`, the attribute repeated, `code = 0` (reserved for
