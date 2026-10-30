@@ -30,7 +30,8 @@ Monorepo.
 
 - App: Flutter, iOS and Android.
 - Backend: own server, Rust (axum) + Postgres. All business rules (attendance window,
-  duplicate attendance, connection requests) are enforced on the server.
+  duplicate attendance, business card exchange conditions, meeting request state transitions)
+  are enforced on the server.
 - Web: React CSR only, no SSR. It fetches from the server API. Serve
   `/.well-known/apple-app-site-association` as `application/json` without redirects.
 - QR codes are generated on the client from the session link; the server never renders QR.
@@ -46,14 +47,25 @@ Monorepo.
   restrained color.
 - References: iOS widgets and Control Center (module sizes), Toss (Korean typography,
   density), Luma (session detail, QR check-in flow).
+- Home has three modules: the highlight session picked by operators, a business meeting
+  request to operators, and my business cards. Session details (program, speakers, panel,
+  host) live only on the session detail screen.
 
 ## MVP scope
 
-Goal: a session-centric archive plus connecting session speakers with interested people.
+Goal: a session-centric archive plus operator-brokered business meetings and business card
+exchange among session attendees.
 
-- Operator features live in the same app, shown only to operator accounts: manage sessions,
-  show the session QR, set the attendance window, view attendance.
+- Operators are the system's operations team. There is no per-session operator; the team
+  manages every session and acts as the bridge between attendees and speakers.
+- Speakers and panelists do not have to sign up. Operators enter their details when
+  registering a session.
+- Operator features live in the same app, shown only to operator accounts: manage sessions
+  (enter speakers and panel, pick the highlight session), show the session QR, set the
+  attendance window, view attendance, meeting request inbox, pre-question inbox.
 - QR attendance is the key flow and must never push sign-up:
+  - The user scans the on-site session QR with the phone camera; the Universal Link opens
+    the attendance screen.
   - One fixed QR per session, encoding an HTTPS link to the session. Attendance is accepted
     only inside the session's attendance window (default 16:30-19:00 on the session day).
   - App installed: the Universal Link / App Link opens the session's attendance screen.
@@ -65,11 +77,15 @@ Goal: a session-centric archive plus connecting session speakers with interested
     cached on the device, and sent with every attendance record. On sign-up, past attendance
     with the same verified email is attached to the account.
   - Scans outside the window or repeated scans record nothing and show a message.
-- Connection requests go to session speakers only. The speaker accepts or declines; on accept
-  both sides' contacts are revealed and the conversation happens outside the app. Guests are
-  asked to sign up at this point.
-- Out of MVP: attendee-to-attendee connections, chat, needs board, company search, payment,
-  RSVP.
+- Business meeting requests go to operators, not directly to speakers. The attendee may
+  specify a related session and target. Status: requested -> confirmed by operators ->
+  connected or on hold. Operators broker the meeting.
+- Pre-questions for a session go to operators.
+- Business cards: attendees who checked in and entered a business card (consenting to share
+  it) automatically exchange cards with everyone else who did both for the same session.
+  The attendee list is the card list; only people who did both are included.
+- Out of MVP: other attendee-to-attendee features (chat), needs board, company search,
+  payment, RSVP.
 
 ## Local development
 
