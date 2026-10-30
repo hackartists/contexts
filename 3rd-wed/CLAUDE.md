@@ -37,7 +37,7 @@ Monorepo.
 - QR codes are generated on the client from the session link; the server never renders QR.
 - Push: Firebase Cloud Messaging only, sent from the server. No other Firebase product.
 - Files (session slides): S3-compatible storage managed by the server.
-- Auth: email verification code only, no passwords, same flow as dataroom
+- Auth: email only (no phone), no passwords. The mail carries a 6-digit code and a one-time login link; same base flow as dataroom
   (`send_code` -> `verify_code` -> server-issued session). The app stores the session token in
   Keychain/Keystore and the session is extended on use, so users stay logged in.
 
@@ -94,4 +94,4 @@ exchange among session attendees.
 - Server runs on port 18080 (8080 is used by dataroom locally): `cd server && make db-up && make seed && make run`.
   Dev login: any email + code `000000`. Seed includes a round-0 demo session dated today with attendance open.
 - App config via `--dart-define`: `API_BASE` (default `http://localhost:18080`), `WEB_ORIGIN` (default `http://localhost:5173`).
-- Deep links: Flutter deep linking is disabled; `app_links` handles `https://<host>/s/{id}` and `thirdwed://s/{id}`.
+- Deep links: Flutter deep linking is disabled; `app_links` handles `https://<host>/s/{id}`, `https://<host>/auth/{token}` (mailed login link) and the `thirdwed://` equivalents. App link host: `3rd-weds.app.biyard.co` (legacy `3rdweb.biyard.co`).
