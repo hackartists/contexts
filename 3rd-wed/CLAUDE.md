@@ -47,6 +47,9 @@ Monorepo.
   restrained color.
 - References: iOS widgets and Control Center (module sizes), Toss (Korean typography,
   density), Luma (session detail, QR check-in flow).
+- Bottom actions sit at safe-area inset + `AppSpacing.ctaBottom` (12) via the shared `BottomSafeArea`
+  widget; Figma Bottom CTA/footers carry the same 12 above the home indicator. Do not use
+  `SafeArea(minimum: ...)` for spacing: it yields max(inset, N), so the gap vanishes on gesture-bar devices.
 - Home has three modules: the highlight session picked by operators, a business meeting
   request to operators, and my business cards. Session details (program, speakers, panel,
   host) live only on the session detail screen.
