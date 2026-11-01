@@ -30,7 +30,7 @@ Monorepo.
 
 - App: Flutter, iOS and Android.
 - Backend: own server, Rust (axum) + Postgres. All business rules (attendance window,
-  duplicate attendance, business card exchange conditions, meeting request state transitions)
+  duplicate attendance, business card exchange conditions, business inquiry state transitions)
   are enforced on the server.
 - Web: React CSR only, no SSR. It fetches from the server API. Serve
   `/.well-known/apple-app-site-association` as `application/json` without redirects.
@@ -50,22 +50,22 @@ Monorepo.
 - Bottom actions sit at safe-area inset + `AppSpacing.ctaBottom` (12) via the shared `BottomSafeArea`
   widget; Figma Bottom CTA/footers carry the same 12 above the home indicator. Do not use
   `SafeArea(minimum: ...)` for spacing: it yields max(inset, N), so the gap vanishes on gesture-bar devices.
-- Home has three modules: the highlight session picked by operators, a business meeting
-  request to operators, and my business cards. Session details (program, speakers, panel,
+- Home has three modules: the highlight session picked by operators, business inquiries
+  (비즈니스 문의) to operators, and my business cards. Session details (program, speakers, panel,
   host) live only on the session detail screen.
 
 ## MVP scope
 
-Goal: a session-centric archive plus operator-brokered business meetings and business card
-exchange among session attendees.
+Goal: a session-centric archive plus post-session business inquiries to operators and business
+card exchange among session attendees.
 
 - Operators are the system's operations team. There is no per-session operator; the team
-  manages every session and acts as the bridge between attendees and speakers.
+  manages every session and follows up with attendees after sessions.
 - Speakers and panelists do not have to sign up. Operators enter their details when
   registering a session.
 - Operator features live in the same app, shown only to operator accounts: manage sessions
   (enter speakers and panel, pick the highlight session), show the session QR, set the
-  attendance window, view attendance, meeting request inbox, pre-question inbox.
+  attendance window, view attendance, business inquiry inbox (문의함), pre-question inbox.
 - QR attendance is the key flow and must never push sign-up:
   - The user scans the on-site session QR with the phone camera; the Universal Link opens
     the attendance screen.
@@ -80,9 +80,13 @@ exchange among session attendees.
     cached on the device, and sent with every attendance record. On sign-up, past attendance
     with the same verified email is attached to the account.
   - Scans outside the window or repeated scans record nothing and show a message.
-- Business meeting requests go to operators, not directly to speakers. The attendee may
-  specify a related session and target. Status: requested -> confirmed by operators ->
-  connected or on hold. Operators broker the meeting.
+- Business inquiries (비즈니스 문의, working name) are the post-session follow-up: the goal is
+  business between the operators and the member, not matching the member with speakers
+  (education may happen along the way). The member picks a purpose (협업·파트너십, 교육, 자문,
+  기타) and writes the content; for 교육 they may also pick the sessions they were interested in.
+  No target and no title. Status: requested -> approved by operators -> completed, or rejected;
+  the member can cancel while requested/approved. Code keeps the `meeting_requests` name.
+  UI copy lives in `app/lib/features/meetings/meeting_copy.dart` so a rename is one file.
 - Pre-questions for a session go to operators.
 - Business cards: attendees who checked in and entered a business card (consenting to share
   it) automatically exchange cards with everyone else who did both for the same session.
