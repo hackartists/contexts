@@ -163,7 +163,8 @@ separate components behind one clear branch.
   - The browser receives `{service, code, message}`; UI shows it only through `describeError`,
     with a `"{service}.{code:06}"` entry in the ko and en catalogs for each user-facing code.
 - **Tests**: unit tests go in a separate `tests.rs`, registered with `#[cfg(test)] mod tests;`
-  (`foo.rs` → `foo/tests.rs`, `dir/mod.rs` → `dir/tests.rs`). No inline
+  next to its module in the same directory: a module with tests is `foo/mod.rs` + `foo/tests.rs`
+  (e.g. `models/<name>/mod.rs`), never `foo.rs` beside a `foo/` directory. No inline
   `mod tests { .. }` blocks; move any you find in a file you touch. This is stricter than
   `docs/conventions/testing.md` and wins.
 
