@@ -65,6 +65,15 @@ List the touched SCSs with per-path changed-line counts for the current branch:
 git diff --numstat origin/dev...HEAD -- . ':!**/Cargo.lock' ':!pnpm-lock.yaml' | awk '{split($3,p,"/"); k=(p[1]=="services"||p[1]=="plugins"||p[1]=="packages")?p[1]"/"p[2]:p[1]; s[k]+=$1+$2} END {for (k in s) print s[k], k}' | sort -rn
 ```
 
+## Tech stack and service promotion
+
+- Internal stack is Rust + Go. Go is acceptable for MSA services where Rust compile cost is a
+  burden; keep memory low by managing GC deliberately (e.g. `GOMEMLIMIT`, avoiding allocation
+  churn on hot paths).
+- This repo stays small. A mature service — one whose change cycle has settled to roughly once a
+  month or less — is promoted to its own repo. Cross-service candidates such as `notification`
+  and `ws-gateway` are promoted first so other services can share them.
+
 ## Software design
 
 - **Scope-visible layout**: a file's directory path must show its scope on its own, without
