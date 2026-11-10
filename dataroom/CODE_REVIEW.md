@@ -190,6 +190,37 @@ under `packages/`):
 - A refactor that moves logic out of the BFF into its owning service is the desired
   direction, not a finding.
 
+**React Query keys**
+
+The convention is in `services/bff/README.md` ("Query keys"). For a PR that adds or changes a
+`useQuery`/`useQueries`/`useMutation` call, a hook, or an `invalidateQueries`, `setQueryData`,
+`setQueriesData`, `removeQueries` or `refetchQueries` call:
+
+- Key origin: every key comes from `@biyard/bff-client/query-keys` or from `coreQueryKey` /
+  `pluginQueryKey`. Flag an inline `queryKey: [...]` array, a key built by `.slice()`, and a key
+  position read (`key[3]`) outside `assessmentKeyMatch`.
+- Root and hierarchy: a key starts with exactly one root (`me`, `workspaces`, `workspace`,
+  `admin`, `public`, `reference`) followed by label and id pairs from the widest scope to the
+  narrowest. Flag data placed under the wrong root (workspace-scoped data without a ws id, admin
+  or public data under `workspace`) and a collection that uses a label in an id slot. A new root
+  must be added to `rootModules` with its `<root>Scope`, `<root>Keys` and `<root>Policy`.
+- Scope of the data: the ws, room and assessment ids in the key must be exactly the ids the
+  `queryFn` sends. Flag an id the `queryFn` reads from context but the key omits, or the reverse.
+- Invalidation: flag a mutation or realtime path that changes data without invalidating,
+  updating or removing every key that shows it, and an invalidation wider or narrower than the
+  data it changed (use the scope helpers; an assessment applied to several rooms is matched with
+  `assessmentEverywhere`). Flag a manual `refetch()` where an invalidation belongs.
+- Freshness: every new key has a `<root>Policy` entry. `staleTime: Infinity` is allowed only when
+  every path that changes the data invalidates the key; flag `Infinity` on a key with a path that
+  does not (another user's change with no realtime frame, for example). Flag a change to the
+  global `QueryClient` defaults.
+- Realtime: a new frame that changes cached data is mapped in `invalidationsFor`, not handled in
+  a screen.
+- Plugin UIs use react-query only through the shared `QueryClientProvider` of their bundle and the
+  keys module; flag a second `QueryClient` or a key defined inside a plugin.
+- New or changed keys need a sample in `samples.fixture.ts`; flag a PR that adds a key without one.
+- Report repeats of the same pattern once with the affected sites.
+
 **Generated TypeScript**
 
 - `export_to = "types/"` is correct; do not flag it.
