@@ -95,9 +95,18 @@ ui/
 - A hook owns the server state it loads and the mutations on it. A mutation method on the hook
   calls the server, then updates the hook's state so every consumer re-renders, and refetches
   when the server may have changed more than the reply shows.
-- Plugin UIs: hooks call `rpc.ts` (`host.call`). They never import react-query or
-  `@biyard/bff-client` hooks. A mutation writes the server's reply into local state and bumps a
+- Plugin UIs: hooks call `rpc.ts` (`host.call`) and never import `@biyard/bff-client` hooks.
+  UI libraries the console compiles (`services/assessment/ui`, `services/dataroom/ui`) may use
+  react-query: `queryFn` calls `rpc.ts`, keys and policies come from
+  `@biyard/bff-client/query-keys`, and a mutation writes the reply with `setQueryData` or
+  invalidates by scope. A runtime bundle that renders them (`plugins/*`) mounts its own
+  `QueryClientProvider`. Other plugin UIs write the server's reply into local state and bump a
   reload nonce.
+- Query keys: every `queryKey` comes from a factory in `@biyard/bff-client/query-keys`; no inline
+  arrays, no `.slice` of a key, no reading key positions (ESLint enforces it). Invalidate or remove
+  by a `<root>Scope` prefix; an assessment across rooms uses `assessmentEverywhere`. A new query
+  adds its factory, its sample in `samples.fixture.ts` and its entry in `<root>Policy` together.
+  Realtime frames map to invalidations only in `invalidationsFor`.
 - Host pages (`services/workspace`): server state comes from the generated `@biyard/bff-client`
   hooks. Hand-written hooks wrap them and use `mutate` and query invalidation. They live in
   `ui/hooks/` like everywhere else.
