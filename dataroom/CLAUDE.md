@@ -199,8 +199,10 @@ logic.
 - New BFF code is justified only when the browser needs a REST shape the dispatchers cannot
   give it, and the PR description must say why.
 - Frontend: host pages use hooks from `@biyard/bff-client`. Plugin UIs call through
-  `host.call` from `@biyard/plugin-host` and never import react-query hooks. No hand-written
-  `fetch` or direct handler calls.
+  `host.call` from `@biyard/plugin-host`; only the UI libraries the console compiles
+  (`services/assessment/ui`, `services/dataroom/ui`) may use react-query, with keys and policies
+  from `@biyard/bff-client/query-keys` (see `SCS.md`). No hand-written `fetch` or direct handler
+  calls.
 
 ## Generated TypeScript
 
