@@ -8,12 +8,13 @@ section of the summary (`COMMON.md`, "Review content").
 ## Which items apply
 
 - **General items (F1–F4)** apply to any frontend change.
-- **Biyard React items (F5–F12)** apply when the repository is `biyard/react-components` or
+- **Biyard React items (F5–F13)** apply when the repository is `biyard/react-components` or
   depends on its packages (`@biyard/components`, `@biyard/bff-client`, `@biyard/plugin-host`,
   … as `git+ssh://git@github.com/biyard/react-components.git#<sha>&path:/packages/<name>`
   entries in `package.json`). `biyard/tracky` is the reference consumer.
-- In other frontends (other products, landing pages), apply F5–F12 only where the repository's own
-  rules or dependencies make them meaningful; say which you skipped.
+- In other frontends (other products, landing pages), apply F5–F13 only where the repository's own
+  rules or dependencies make them meaningful; say which you skipped. In F1 their own shared
+  component library, if any, takes the place of `@biyard/components`.
 
 ## Already enforced by CI
 
