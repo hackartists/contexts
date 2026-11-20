@@ -94,6 +94,10 @@ to apply.
       the existing trait, interface or enum dispatch, flag it and name the dispatch point to
       extend (reference: `biyard/assessment` `sdk/src/data_view_schema/` — the
       `DataViewComponent` trait and `value_specs/`, one file per kind).
+    - In UI code, a single-choice control (Combobox, Dropdown and similar) whose selected option
+      branches the main logic or flow downstream (not just a label or a filter), with the branch
+      inlined at the call site, is a trait-of-kinds candidate; name the existing pattern to follow
+      if the code base already has one.
     - Do not flag a plain `match`/`if` over a fixed, closed set with no plausible future addition
       (a boolean toggle).
   - Report: inline at the first site, naming the other sites and the target directory or dispatch
