@@ -112,6 +112,12 @@ git diff --numstat origin/dev...HEAD -- . ':!**/Cargo.lock' ':!**/pnpm-lock.yaml
   `table-access.allow` with the reason in the PR.
 - No stored values derivable by aggregates. Indexes cover every query you add or change.
 - Schema changes go expand → switch → contract across releases.
+- Changing the shape of stored data is lazy by default: the stored value has an integer version
+  (missing = 1), each version step is a `Migrator` impl applied at `deserialize`, and the
+  converted value is written back after the response (compare-and-set on the old version, no
+  `updated_at` or event). Immutable (published, hashed, signed) data is converted in memory only.
+  New versions read first and enable write-back in the next release. Bulk rewrites are the
+  exception: new columns, tables and indexes, filtered or joined columns, row-level data fixes.
 
 ## UI
 

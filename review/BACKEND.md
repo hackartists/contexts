@@ -132,12 +132,30 @@ Read the repository's `ci.yml` to confirm it calls the shared workflow and with 
     every query the diff introduces or changes. Old pods keep serving on the new schema during a
     rollout, so a schema change goes expand → switch → contract across releases (review only, no
     CI check).
+  - Rules (stored data shape): changing the shape of stored data — JSON or payload columns,
+    snapshots, derived rows — is done lazily by default, not by a bulk rewrite. The stored value
+    carries an integer version (missing means version 1). Each version step is a `Migrator` impl
+    (rbdk; until it ships, one conversion function per version called from the type's
+    `deserialize`), so the reader always returns the current type. After the response, the
+    converted value is written back with a compare-and-set on the old version (no `updated_at`
+    change, no event, no audit entry); the next read then loads migrated data. Immutable data
+    (published snapshots, audit, anything hashed, signed or anchored) is converted in memory and
+    never written back; the type declares which it is. A version added in one release reads
+    only; write-back is enabled in the next, after every pod runs the reader (old pods must not
+    meet a version they cannot read). A higher version than the reader knows is a `ServiceError`,
+    never ignored. A one-time bulk migration is acceptable only when lazy conversion cannot
+    work — a new column, table or index; a column that is filtered, sorted or joined; a row-level
+    data fix — and it stays backward compatible and is owned by the service itself.
   - Check: the model fits its storage type; relationships are appropriate; a migration that drops
     or renames a column or table still read by the running release; a new entry in
     `table-access.allow` (reading another service's table) — the PR must say why the owner's gRPC
-    API cannot serve it.
+    API cannot serve it; a stored-shape change with no version field or `Migrator` step; a
+    one-shot `UPDATE` or SQL script that rewrites payloads a `Migrator` step could convert (the
+    PR must say why it cannot be lazy); write-back on immutable data; a release that adds a
+    version and enables its write-back together.
   - Report: inline on the migration or model. Blocking for a missing foreign key, a destructive
-    one-step schema change and an unjustified `table-access.allow` entry.
+    one-step schema change, an unjustified `table-access.allow` entry, a bulk payload rewrite
+    where a `Migrator` step would do, and write-back on immutable data.
 
 - [ ] **B9. Configuration and deployment**
   - Check: a new setting read by the service is listed with its default in `.env.sample`
