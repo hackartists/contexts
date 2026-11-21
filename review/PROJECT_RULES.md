@@ -113,10 +113,12 @@ git diff --numstat origin/dev...HEAD -- . ':!**/Cargo.lock' ':!**/pnpm-lock.yaml
 - No stored values derivable by aggregates. Indexes cover every query you add or change.
 - Schema changes go expand → switch → contract across releases.
 - Changing the shape of stored data is lazy by default: the stored value has an integer version
-  (missing = 1), each version step is a `Migrator` impl applied at `deserialize`, and the
-  converted value is written back after the response (compare-and-set on the old version, no
-  `updated_at` or event). Immutable (published, hashed, signed) data is converted in memory only.
-  New versions read first and enable write-back in the next release. Bulk rewrites are the
+  under `data_version` in the JSON (missing = 1), the type derives `VersionedJson`, each version
+  step is an `impl Migrator<N>` applied when the column is decoded, and the converted value is
+  written back after the response (compare-and-set on the value read, no `updated_at` or event).
+  Immutable (published, hashed, signed) data is `#[data_version(immutable)]` and converted in
+  memory only. The release that raises `current` sets `write_back = false` (read only) and the
+  next release removes it. Bulk rewrites are the
   exception: new columns, tables and indexes, filtered or joined columns, row-level data fixes.
 
 ## UI

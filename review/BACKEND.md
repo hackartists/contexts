@@ -71,7 +71,9 @@ Read the repository's `ci.yml` to confirm it calls the shared workflow and with 
     `to_x` / `from_x` helper functions. Boilerplate that an existing macro or an rbdk crate already
     provides is not repeated (`postgres` entities and queries, `service-error`, `service-runtime`
     `CommonServer`, `runtime-config`, `event`, `common-api-routes`, `net-guard`,
-    `canonical-json`, `shared`; list in `biyard/rbdk` `README.md`).
+    `canonical-json`, `shared`; list in `biyard/rbdk` `README.md`). Versioned stored JSON uses
+    `postgres` `VersionedJson` / `Migrator`, not a hand-written `deserialize_with` conversion or a
+    SQL `CASE WHEN` on a version.
   - Report: inline, naming the trait, macro or crate to use.
 
 - [ ] **B4. Tests**
@@ -134,16 +136,18 @@ Read the repository's `ci.yml` to confirm it calls the shared workflow and with 
     CI check).
   - Rules (stored data shape): changing the shape of stored data — JSON or payload columns,
     snapshots, derived rows — is done lazily by default, not by a bulk rewrite. The stored value
-    carries an integer version (missing means version 1). Each version step is a `Migrator` impl
-    (rbdk; until it ships, one conversion function per version called from the type's
-    `deserialize`), so the reader always returns the current type. After the response, the
+    carries an integer version under `data_version` inside the JSON (or the type's `key`; missing
+    means version 1). The type derives `VersionedJson` with `#[data_version(current = N)]` and
+    each version step is an `impl Migrator<N>` (rbdk `postgres::data_version`), applied when the
+    column is decoded, so the reader always returns the current type. After the response, the
     converted value is written back with a compare-and-set on the old version (no `updated_at`
     change, no event, no audit entry); the next read then loads migrated data. Immutable data
     (published snapshots, audit, anything hashed, signed or anchored) is converted in memory and
-    never written back; the type declares which it is. A version added in one release reads
-    only; write-back is enabled in the next, after every pod runs the reader (old pods must not
-    meet a version they cannot read). A higher version than the reader knows is a `ServiceError`,
-    never ignored. A one-time bulk migration is acceptable only when lazy conversion cannot
+    never written back; the type declares `#[data_version(immutable)]`. The release that raises
+    `current` sets `write_back = false` and only reads; the next release removes it, after every
+    pod runs the reader (old pods must not meet a version they cannot read). A higher version than
+    the reader knows is `DataVersionError::Unsupported`, mapped to a 503 variant of the service's
+    error enum, never ignored. A one-time bulk migration is acceptable only when lazy conversion cannot
     work — a new column, table or index; a column that is filtered, sorted or joined; a row-level
     data fix — and it stays backward compatible and is owned by the service itself.
   - Check: the model fits its storage type; relationships are appropriate; a migration that drops
@@ -151,8 +155,10 @@ Read the repository's `ci.yml` to confirm it calls the shared workflow and with 
     `table-access.allow` (reading another service's table) — the PR must say why the owner's gRPC
     API cannot serve it; a stored-shape change with no version field or `Migrator` step; a
     one-shot `UPDATE` or SQL script that rewrites payloads a `Migrator` step could convert (the
-    PR must say why it cannot be lazy); write-back on immutable data; a release that adds a
-    version and enables its write-back together.
+    PR must say why it cannot be lazy); write-back on immutable data; a diff that raises `current`
+    without `write_back = false`; a JSONB type whose stored shape changed but still derives
+    `PostgresJson`; a `Migrator` step removed while `count_versions` shows rows still at that
+    version.
   - Report: inline on the migration or model. Blocking for a missing foreign key, a destructive
     one-step schema change, an unjustified `table-access.allow` entry, a bulk payload rewrite
     where a `Migrator` step would do, and write-back on immutable data.
