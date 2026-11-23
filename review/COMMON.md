@@ -105,16 +105,21 @@ to apply.
 
 - [ ] **C4. Comments in source**
   - The rule comes from the project rules: whatever they forbid is flagged. When they are silent,
-    the default is: no explanatory or inline comments; doc comments only on the public API of a
-    library (a crate or package other repositories depend on), describing concept and usage for
-    its consumers.
+    the default applies to every biyard repository and language: only doc comments that a
+    documentation tool picks up (rustdoc `///` `//!`, TSDoc/TypeDoc `/** */`, dartdoc `///`) are
+    allowed, attached to a module, type, function or field declaration. Their content is purpose,
+    usage context and usage examples: what stays true when the code changes. Everything else is
+    flagged: `//`, `/* */` and `#` comments; any comment inside a function body, `///` and
+    `/** */` included, since tools ignore it there; and doc comments that narrate steps,
+    implementation details, history, or TODOs.
   - Check: every comment the diff adds. Whole-file scope: in a file the diff touches, comments the
     rules forbid are flagged too, even on unchanged lines. Untouched files stay as they are.
     Generated files keep their generator's header.
   - Report: ask for deletion. Suggest moving a comment's content into `README.md` or `docs/` only
     when it states a concept a reader must know to use the code, and only in the form the
     documentation rules (C6) allow; never for a comment that explains what the code does. Never
-    ask the author to ADD a comment or doc comment. One comment per file listing its lines.
+    ask the author to ADD a comment or doc comment. One comment per file listing its lines; for
+    a doc comment, say whether it sits in a function body or describes implementation.
     Survives pruning.
 
 - [ ] **C5. Generated files**

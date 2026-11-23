@@ -199,5 +199,5 @@ Read the repository's `ci.yml` to confirm it calls the shared workflow and with 
   - Check: only domain-free code (domain code belongs in the owning service's sdk); a removed or
     changed public item comes with a major version bump of that crate; proc-macro crates, which
     `cargo semver-checks` cannot compare, are checked by hand for breaking changes. Doc comments
-    on the public API are allowed (library; `COMMON.md` C4).
+    on declarations are allowed (`COMMON.md` C4).
   - Report: inline. Blocking for an unbumped breaking change.

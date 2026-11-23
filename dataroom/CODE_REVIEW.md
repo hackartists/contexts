@@ -148,11 +148,15 @@ under `packages/`):
   it gets wrong or skips); never for a one-line helper.
 - Collapse repeated occurrences of the same pattern into one comment that lists the sites.
 
-**No comments in source**
+**Comments in source**
 
-- Flag every comment the diff adds to a source file and ask the author to delete it.
+- Allowed: only doc comments a documentation tool renders (rustdoc `///` `//!`, TSDoc `/** */`,
+  dartdoc `///`) on declarations, with purpose, usage context and usage examples as content.
+- Flag every other comment the diff adds to a source file (`//`, `/* */`, `#`, any comment inside
+  a function body even if written as `///` or `/** */`, doc comments that narrate steps,
+  implementation, history or TODOs) and ask the author to delete it.
 - Whole-file scope: when the diff touches a source file that still carries comments, flag
-  those too, even on lines the diff did not change. Files the diff does not touch stay as
+  those too (comments the rule forbids), even on lines the diff did not change. Files the diff does not touch stay as
   they are.
 - The default is plain deletion. Suggest moving a comment's content into `README.md` or
   `docs/` ONLY when it describes an important concept or technique a reader must know to

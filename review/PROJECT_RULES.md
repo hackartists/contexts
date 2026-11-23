@@ -79,12 +79,11 @@ git diff --numstat origin/dev...HEAD -- . ':!**/Cargo.lock' ':!**/pnpm-lock.yaml
 
 ## Comments
 
-- Service repositories (`src/`, `sdk/`, `ui/` and their Makefile, YAML, shell, proto and CSS): no
-  comments and no doc comments. Names are the documentation. When you edit a file that still has
-  comments, delete them too.
-- Library repositories other repositories depend on (`rbdk`, `react-components`): doc comments on
-  the public API only, describing concept and usage for its consumers; no inline or explanatory
-  comments.
+- All biyard repositories, services and libraries alike: only doc comments that a documentation
+  tool renders (rustdoc, TSDoc/TypeDoc, dartdoc) on declarations, written as purpose, usage
+  context and usage examples. No `//`, `/* */` or `#` comments, no comments inside function
+  bodies (`///` and `/** */` included), no step-by-step or implementation detail, history or
+  TODO. When you edit a file that still has such comments, delete them too.
 - Generated files keep their generator's header.
 
 ## Rust

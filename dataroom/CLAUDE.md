@@ -116,12 +116,15 @@ git diff --numstat origin/dev...HEAD -- . ':!**/Cargo.lock' ':!pnpm-lock.yaml' |
   - This is a naming rule, not a layout rule: it does not require mirroring the backend's
     directory structure 1:1 in `ui/`, only that the type/file name itself carries the link.
 
-## No comments in source
+## Comments in source
 
-No comments or doc comments in `.rs`, `.ts`, `.tsx`, `.css`, `.proto`, Makefile, YAML or shell
-(`docs/architecture.md` "Comments", `docs/conventions/anti-patterns.md`). Names are the
-documentation. When you edit a file that still has comments, delete them too. Generated files
-keep their generator's header.
+Only doc comments that a documentation tool renders (rustdoc `///` `//!`, TSDoc `/** */`,
+dartdoc `///`) on declarations, written as purpose, usage context and usage examples: content
+that stays true when the code changes. No `//`, `/* */` or `#` comments, no comments inside
+function bodies (`///` and `/** */` included), no step-by-step or implementation detail,
+history or TODO. When you edit a file that still has such comments, delete them too. Generated
+files keep their generator's header. (Supersedes `docs/architecture.md` "Comments" and
+`docs/conventions/anti-patterns.md`.)
 
 ## UI
 
@@ -285,7 +288,7 @@ Before opening one, check:
       carry a name that makes the link obvious (exact match when 1:1, partial match otherwise).
 - [ ] No manual plugin bundle version bump (`plugins/review`, `plugins/vc` `package.json`) — CI
       resolves the published bundle version from the commit SHA automatically.
-- [ ] No comments in touched source files.
+- [ ] Comments in touched source files are declaration doc comments only (purpose/usage).
 - [ ] No inline test modules.
 - [ ] Errors follow `ERROR.md`: every new failure is a `ServiceError` variant with `code` and
       `status`; existing codes unchanged; 5xx variants carry no detail and are logged where
