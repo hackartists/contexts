@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-3rd Wed (써드웨드) is the app for a monthly blockchain business community. Each month the
+3rd Weds (써드웨즈) is the app for a monthly blockchain business community. Each month the
 community takes one industry and discusses how RWA (real-world asset tokenization) and STO
 (security token offering) could apply to it, aiming to turn the discussion into partnerships
 and pilot projects.
