@@ -184,6 +184,7 @@ separate components behind one clear branch.
 
 - Design relationally first. Model every relationship as its own column or link table with a foreign key and an explicit `on_delete` (`CASCADE` when the child has no meaning without the parent, `RESTRICT` otherwise). Do not keep references inside JSON columns or as untyped `String` ids, and do not replace a foreign key with application-side or event-driven cleanup.
 - All services share one database, so a foreign key may point at a table another service owns. Reference that table's primary key, and add the mirror only if you also read it.
+- Exception, services with their own database (`report`: `report_dev` / `report`): ids of entities another service owns (workspace, data room, user, assessment) are stored as values with an index and no foreign key. The service consumes the owner's deletion events (idempotent on `event_id`) and runs a periodic reconcile through the owner's internal gRPC to block and later purge dependent rows. Tables inside that database still use foreign keys with an explicit `on_delete`.
 - Exactly one owning service migrates each table. Any other service reads it only through a `#[postgres(skip_schema)]` mirror whose columns are a strict subset of the owner's.
 - Do not store values derivable by aggregate queries (sum, count, avg); compute them on demand.
 - Add indexes that cover every query you introduce or change.
@@ -306,7 +307,7 @@ Before opening one, check:
 - [ ] Events and gRPC messages carry sdk types, not JSON in `String` / `serde_json::Value`.
 - [ ] No new BFF feature routes; no generated TypeScript committed.
 - [ ] No spec, plan or code-narrating docs added.
-- [ ] Relationships are foreign keys with an explicit `on_delete`, not ids in JSON or event-driven cleanup.
+- [ ] Relationships are foreign keys with an explicit `on_delete`, not ids in JSON or event-driven cleanup (services with their own database: see the Data modeling exception).
 - [ ] New or moved UI code follows the `SCS.md` layout; custom hooks are in `ui/hooks/`.
 - [ ] Screens follow `UI.md`: flat surfaces, no prominent borders (`shadow-e1` or near-surface fill instead), stronger shadows only on floating layers, colour for state only, no product-UI gradients.
 - [ ] User-facing flows follow `UX.md`: next step legible; unasked-for actions ignorable and reversible; delegated actions have range, review and undo.
